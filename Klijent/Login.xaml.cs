@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Klijent.Kontroleri_GUI_;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -14,9 +15,7 @@ using System.Windows.Shapes;
 
 namespace Klijent
 {
-    /// <summary>
-    /// Interaction logic for Login.xaml
-    /// </summary>
+    
     public partial class Login : Window
     {
         public Login()
@@ -24,5 +23,14 @@ namespace Klijent
             InitializeComponent();
         }
 
+        private async void Login_Click(object sender, RoutedEventArgs e)
+        {
+            await LoginGuiKontroler.Instance.LogIn(txt_korisnicko_ime.Text,txt_lozinka.Password);
+        }
+
+        private void Register_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
     }
 }

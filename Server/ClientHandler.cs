@@ -1,5 +1,9 @@
-﻿using System.Diagnostics;
+﻿
+using Klijent.Domen;
+using System.Diagnostics;
 using System.Net.Sockets;
+using System.Text.Json;
+using System.Threading.Tasks;
 using Zajednicki;
 
 namespace Server
@@ -23,7 +27,7 @@ namespace Server
                 while(socket.Connected && !token.IsCancellationRequested)
                 {
                     Zahtev z = await serializer.ReceiveAsync<Zahtev>(token);
-                    Odgovor o = ProcessRequest(z);
+                    Odgovor o = await ProcessRequest(z);
                     await serializer.SendAsync(o,token);
                 }
             }
@@ -43,14 +47,16 @@ namespace Server
             }
         }
 
-        private Odgovor ProcessRequest(Zahtev z)
+        private async Task<Odgovor> ProcessRequest(Zahtev z)
         {
             Odgovor o = new Odgovor();
             try
             {
                 switch(z.Operacija)
                 {
-                    //
+                    case Operacija.LogIn:
+                       o = await Kontroler.Instance.LogIn(serializer.ReadType<Korisnik>((JsonElement)z.Objekat));
+                        break;
                 }
             }
             catch { }

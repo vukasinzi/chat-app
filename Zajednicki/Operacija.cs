@@ -6,6 +6,7 @@ namespace Zajednicki
 {
     public enum Operacija
     {
-        Posalji
+        LogIn,
+        Register
     };
 }
