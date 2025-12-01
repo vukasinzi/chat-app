@@ -1,5 +1,7 @@
 <Solution>
+  <Project Path="BrokerBazePodataka/BrokerBazePodataka.csproj" Id="8a8f7810-2c45-4ada-b341-a9ce21b83dc8" />
   <Project Path="Klijent/Klijent.csproj" Id="eb75f2ba-ed6f-4fcc-82fd-e3d378889103" />
   <Project Path="Server/Server.csproj" Id="c721b14e-6d2a-4410-ae15-fcb5d9f50936" />
+  <Project Path="SystemOperationsBase/SystemOperationsBase.csproj" Id="822e547c-6b22-419d-9f8d-e42d659f4355" />
   <Project Path="Zajednicki/Zajednicki.csproj" Id="fe2a234c-5762-4455-91d3-6515bd3217b5" />
 </Solution>

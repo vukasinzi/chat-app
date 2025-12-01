@@ -51,7 +51,7 @@ namespace BrokerBazePodataka
         }
 
 
-        //Broker.
+        //broker
        
     }
 }
