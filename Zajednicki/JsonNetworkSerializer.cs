@@ -34,14 +34,14 @@ namespace Zajednicki
         public async Task<T> ReceiveAsync<T>(CancellationToken token = default)
         {
             token.ThrowIfCancellationRequested();
-            string json = await reader.ReadLineAsync();
+            string json = await reader.ReadLineAsync(token);
             if (json == null)
                 throw new IOException("Konekcija je zatvorena.");
             return JsonSerializer.Deserialize<T>(json)!;
         }
-        public T ReadType<T>(JsonElement podaci) where T : class
+        public T ReadType<T>(JsonElement stuff) where T : class
         {
-            var result = JsonSerializer.Deserialize<T>(podaci.GetRawText());
+            var result = JsonSerializer.Deserialize<T>(stuff.GetRawText());
             if (result == null)
                 throw new InvalidOperationException("Deserijalizacija ne funkcionise.");
 

@@ -1,8 +1,11 @@
-﻿using Microsoft.Data.SqlClient;
+﻿using Klijent.Domen;
+using Microsoft.Data.SqlClient;
 using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Text;
+using Zajednicki;
+using Zajednicki.Domen;
 
 namespace BrokerBazePodataka
 {
@@ -52,6 +55,26 @@ namespace BrokerBazePodataka
 
 
         //broker
-       
+      
+        public IObjekat getCriteria(IObjekat obj)
+        {
+
+            IObjekat result;
+            string sql = $"select * from {obj.nazivTabele} where {obj.kriterijumWhere}";
+            SqlCommand cmd = CreateCmd(sql);
+            SqlDataReader dr = cmd.ExecuteReader();
+            result = obj.vratiObjekat(dr);
+            dr.Close();
+            return result;
+        }
+
+        public int Insert(IObjekat k)
+        {
+             
+            string sql = $"insert into {k.nazivTabele} values({k.vrednostiNaziv})";
+            SqlCommand cmd = CreateCmd(sql);
+            int affectedRows = cmd.ExecuteNonQuery();
+            return affectedRows;
+        }
     }
 }

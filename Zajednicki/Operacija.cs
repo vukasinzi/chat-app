@@ -7,6 +7,7 @@ namespace Zajednicki
     public enum Operacija
     {
         LogIn,
-        Register
+        RegistrujSe,
+        Dostupnost
     };
 }

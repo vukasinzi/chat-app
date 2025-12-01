@@ -27,7 +27,7 @@ namespace Server
                 while(socket.Connected && !token.IsCancellationRequested)
                 {
                     Zahtev z = await serializer.ReceiveAsync<Zahtev>(token);
-                    Odgovor o = await ProcessRequest(z);
+                    Odgovor o = await ProcessRequests(z);
                     await serializer.SendAsync(o,token);
                 }
             }
@@ -47,7 +47,7 @@ namespace Server
             }
         }
 
-        private async Task<Odgovor> ProcessRequest(Zahtev z)
+        private async Task<Odgovor> ProcessRequests(Zahtev z)
         {
             Odgovor o = new Odgovor();
             try
@@ -55,13 +55,19 @@ namespace Server
                 switch(z.Operacija)
                 {
                     case Operacija.LogIn:
-                       o = await Kontroler.Instance.LogIn(serializer.ReadType<Korisnik>((JsonElement)z.Objekat));
+                       o.Uspesno = await Kontroler.Instance.LogIn(serializer.ReadType<Korisnik>((JsonElement)z.Objekat));
+                        break;
+                    case Operacija.Dostupnost:
+                        o.Uspesno = await Kontroler.Instance.Dostupan(serializer.ReadType<Korisnik>((JsonElement)z.Objekat));
+                        break;
+                    case Operacija.RegistrujSe:
+                        o.Uspesno = await Kontroler.Instance.RegistrujSe(serializer.ReadType<Korisnik>((JsonElement)z.Objekat));
                         break;
                 }
             }
             catch { }
-            if (o.Poruka == null && o.Rezultat == null)
-                return null;
+            if (o.Poruka == "greska")
+                throw new Exception("login exception");
             return o;
         }
     }

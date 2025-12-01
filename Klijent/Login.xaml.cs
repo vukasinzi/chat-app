@@ -28,9 +28,9 @@ namespace Klijent
             await LoginGuiKontroler.Instance.LogIn(txt_korisnicko_ime.Text,txt_lozinka.Password);
         }
 
-        private void Register_Click(object sender, RoutedEventArgs e)
+        private async void Register_Click(object sender, RoutedEventArgs e)
         {
-
+            await LoginGuiKontroler.Instance.RegistrujSe(txt_korisnicko_ime.Text, txt_lozinka.Password);
         }
     }
 }

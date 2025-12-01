@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Klijent.Domen;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -20,9 +21,12 @@ namespace Klijent
     /// </summary>
     public partial class MainWindow : Window
     {
-        public MainWindow()
+        private Korisnik trenutni;
+        public MainWindow(Korisnik trenutni)
         {
             InitializeComponent();
+            this.trenutni = trenutni;
         }
+        
     }
 }

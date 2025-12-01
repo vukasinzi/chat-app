@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Net.Sockets;
 using System.Text;
+using System.Text.Json;
 using Zajednicki;
 
 namespace Klijent
@@ -64,5 +65,40 @@ namespace Klijent
             }
         }
 
+      
+        internal async Task<Odgovor> RegistrujSe(Korisnik k)
+        {
+            try
+            {
+                Zahtev z = new Zahtev(Operacija.RegistrujSe, k);
+                await serializer.SendAsync(z);
+                Odgovor o = await serializer.ReceiveAsync<Odgovor>();
+                return o;
+            }
+            catch(Exception x)
+            {
+                Odgovor o = new Odgovor();
+                o.Poruka = "greska";
+                return o;
+            }
+        }
+
+        internal async Task<Odgovor> Dostupan(Korisnik k)
+        {
+            try
+            {
+                Zahtev z = new Zahtev(Operacija.Dostupnost, k);
+                await serializer.SendAsync(z);
+                Odgovor odgovor = await serializer.ReceiveAsync<Odgovor>();
+
+                return odgovor;
+            }
+            catch (Exception ex)
+            {
+                Odgovor o = new Odgovor();
+                o.Poruka = "greska";
+                return o;
+            }
+        }
     }
 }

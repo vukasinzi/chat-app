@@ -12,6 +12,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\SystemOperationsBase\SO.csproj" />
     <ProjectReference Include="..\Zajednicki\Zajednicki.csproj" />
   </ItemGroup>
 

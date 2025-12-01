@@ -3,16 +3,16 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace SystemOperationsBase
+namespace SO
 {
     public abstract class SystemOperationsBase
     {
-        private GenericBroker broker;
+        public GenericBroker broker;
         public SystemOperationsBase()
         {
             broker = new GenericBroker();
         }
-        protected void Execute()
+        public void Execute()
         {
             try
             {

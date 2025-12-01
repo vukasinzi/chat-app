@@ -12,6 +12,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\BrokerBazePodataka\BrokerBazePodataka.csproj" />
+    <ProjectReference Include="..\Zajednicki\Zajednicki.csproj" />
   </ItemGroup>
 
 </Project>
