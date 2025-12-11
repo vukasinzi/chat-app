@@ -5,6 +5,7 @@ using System.Net.Sockets;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Zajednicki;
+using Zajednicki.Domen;
 
 namespace Server
 {
@@ -77,10 +78,13 @@ namespace Server
                         o.Uspesno = await Kontroler.Instance.RegistrujSe(serializer.ReadType<Korisnik>((JsonElement)z.Objekat));
                         break;
                     case Operacija.Pretraga:
-                        o.Uspesno = await Kontroler.Instance.Pretrazi(serializer.ReadType<string>((JsonElement)z.Objekat));
+                        o = await Kontroler.Instance.Pretrazi(serializer.ReadType<string>((JsonElement)z.Objekat));
                         break;
                     case Operacija.Prijatelji:
                         o.Rezultat = await Kontroler.Instance.Prijatelji(serializer.ReadType<Korisnik>((JsonElement)z.Objekat));
+                        break;
+                    case Operacija.Posalji:
+                        o.Uspesno = await Kontroler.Instance.Posalji(serializer.ReadType<Poruka>((JsonElement)z.Objekat));
                         break;
             
                 }

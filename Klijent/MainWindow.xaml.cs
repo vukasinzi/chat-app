@@ -53,9 +53,13 @@ namespace Klijent
 
         }
 
-        private void Send_Click(object sender, RoutedEventArgs e)
+        private async void Send_Click(object sender, RoutedEventArgs e)
         {
             string poruka_text = messageText.Text;
+            ListBoxItem item = (ListBoxItem)Kontakti.SelectedItem;
+            Korisnik primalac = (Korisnik)item.Tag;
+            await MainGuiKontroler.Instance.Posalji(poruka_text, k.Id,primalac.Id);
+
 
         }
 
@@ -64,7 +68,7 @@ namespace Klijent
             if (SearchTextBox.Text == k.Korisnicko_ime)
                 return;
             Korisnik coveculjak = new Korisnik();
-            coveculjak.Korisnicko_ime = await MainGuiKontroler.Instance.Pretrazi(SearchTextBox.Text);
+            coveculjak = await MainGuiKontroler.Instance.Pretrazi(SearchTextBox.Text);
             if (coveculjak.Korisnicko_ime == "greska")
                 return;
             foreach(ListBoxItem item in Kontakti.Items)
@@ -74,7 +78,8 @@ namespace Klijent
             }
             ListBoxItem i = new ListBoxItem
             {
-                Content = coveculjak.Korisnicko_ime
+                Content = coveculjak.Korisnicko_ime,
+                Tag = coveculjak
             };
             Kontakti.Items.Add(i);
             
@@ -86,6 +91,7 @@ namespace Klijent
             ListBoxItem i = (ListBoxItem)Kontakti.SelectedItem;
 
             user.Text = i.Content.ToString();
+            PorukePanel.Children.Clear();
         }
         
 
@@ -96,7 +102,8 @@ namespace Klijent
             {
                 ListBoxItem i = new ListBoxItem
                 {
-                    Content = k.Korisnicko_ime
+                    Content = k.Korisnicko_ime,
+                    Tag = k
                 };
                 Kontakti.Items.Add(i);
             }

@@ -24,7 +24,7 @@ namespace Klijent.Kontroleri_GUI_
         }
         public List<Korisnik> prijatelji = new List<Korisnik>();
 
-        internal async Task<string> Pretrazi(string msgtext)
+        internal async Task<Korisnik> Pretrazi(string msgtext)
         {
             try
             {
@@ -37,13 +37,13 @@ namespace Klijent.Kontroleri_GUI_
                     MessageBox.Show("Ne postoji korisnik sa tim korisnickim imenom.");
                     throw new Exception("aaa");
                 }
+                Korisnik l = (Korisnik)o.Rezultat;
+                return l;
 
-                return msgtext;
-                    
             }
             catch (Exception x)
             {
-                return "greska";
+                return null;
             }
         }
 
@@ -65,6 +65,21 @@ namespace Klijent.Kontroleri_GUI_
             }
         }
 
-      
+        internal async Task Posalji(string poruka_text, int posiljalac,int primalac)
+        {
+            try
+            {
+                Komunikacija.Instance.Connect();
+                Odgovor o = await Komunikacija.Instance.Posalji(poruka_text, posiljalac,primalac);
+                if (!o.Uspesno)
+                    MessageBox.Show("Nemoguce poslati poruku");
+
+                
+            }
+            catch(Exception x)
+            {
+                return;
+            }
+        }
     }
 }

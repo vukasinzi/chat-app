@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using Zajednicki;
 using Zajednicki.Domen;
 
 namespace SO
@@ -10,7 +11,7 @@ namespace SO
     {
         private string msgText;
         Korisnik k = new Korisnik();
-        public bool Uspesno = false;
+        public Odgovor o = new Odgovor();
         public PretraziSO(string msgText)
         {
             this.msgText = msgText;
@@ -20,8 +21,9 @@ namespace SO
         }
         protected override void ExecuteConcreteOperation()
         {
-            if ((Korisnik)broker.getCriteria(k) != null)
-                Uspesno = true;
+            o.Rezultat = (Korisnik)broker.getCriteria(k);
+            if (o.Rezultat != null)
+                o.Uspesno = true;
 
         }
     }

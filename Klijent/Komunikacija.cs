@@ -6,6 +6,7 @@ using System.Net.Sockets;
 using System.Text;
 using System.Text.Json;
 using Zajednicki;
+using Zajednicki.Domen;
 
 namespace Klijent
 {
@@ -106,13 +107,15 @@ namespace Klijent
             }
         }
 
-        internal async Task<Odgovor> Pretrazi(string msgText)
+        internal async Task<Odgovor> Pretrazi(string text)
         {
             try
             {
-                Zahtev z = new Zahtev(Operacija.Pretraga, msgText);
+                Zahtev z = new Zahtev(Operacija.Pretraga, text);
                 serializer.SendAsync(z);
                 Odgovor o = await serializer.ReceiveAsync<Odgovor>();
+                Korisnik k = serializer.ReadType<Korisnik>((JsonElement)o.Rezultat);
+                o.Rezultat = k;
                 return o;
             }catch(Exception x)
             {
@@ -142,6 +145,25 @@ namespace Klijent
                 return o;
             }
 
+        }
+
+        internal async Task<Odgovor> Posalji(string pt,int posiljalac,int primalac)
+        {
+            try
+            {
+                Zahtev z = new Zahtev();
+                z.Operacija = Operacija.Posalji;
+                Poruka p = new Poruka(primalac,posiljalac,pt);
+                z.Objekat = p;
+                serializer.SendAsync(z);
+                Odgovor o = await serializer.ReceiveAsync<Odgovor>();
+                return o;
+            }
+            catch(Exception x)
+            {
+                Odgovor o = new Odgovor();
+                return o;
+            }
         }
     }
 }

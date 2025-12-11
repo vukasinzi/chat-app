@@ -12,13 +12,20 @@ namespace Zajednicki.Domen
         public int posiljalac_id { get; set; }
         public string poruka_text { get; set; }
         public string nazivTabele { get; set; } = "Poruka";
-        public object koloneNaziv { get; set; } = "id,primalac,posiljalac,poruka_text,datum";
-        public string vrednostiNaziv { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+        public object koloneNaziv { get; set; } = "posiljalac,primalac,poruka_text,datum";
+        public string vrednostiNaziv { get; set; }
         public string kljucPrimarni { get; set; } = "id";
-        public string kljucSpoljni { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-        public string kriterijumWhere { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+        public string kljucSpoljni { get; set; }
+        public string kriterijumWhere { get; set; }
 
         public DateTime datum;
+
+        public Poruka(int primalac_id, int posiljalac_id, string poruka_text)
+        {
+            this.primalac_id = primalac_id;
+            this.posiljalac_id = posiljalac_id;
+            this.poruka_text = poruka_text;
+        }
 
         public List<IObjekat> vratiObjekte(SqlDataReader dr)
         {

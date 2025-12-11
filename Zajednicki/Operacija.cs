@@ -10,6 +10,7 @@ namespace Zajednicki
         RegistrujSe,
         Dostupnost,
         Pretraga,
-        Prijatelji
+        Prijatelji,
+        Posalji
     };
 }

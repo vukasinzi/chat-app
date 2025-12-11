@@ -76,7 +76,7 @@ namespace BrokerBazePodataka
             int affectedRows = cmd.ExecuteNonQuery();
             return affectedRows;
         }
-        public List<IObjekat> GetAllJoin(IObjekat obj,int id)
+        public List<IObjekat> GetAllJoin(IObjekat obj,int id)//popravi. nije genericki uopste. uzasno. srediti i sql injection
         {
             
             List<IObjekat> result;

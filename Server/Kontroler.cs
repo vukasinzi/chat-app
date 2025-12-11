@@ -37,11 +37,18 @@ namespace Server
 
         }
 
-        internal async Task<bool> Pretrazi(string v)
+        internal async Task<bool> Posalji(Poruka poruka)
+        {
+            SystemOperationsBase pos = new PosaljiSO(poruka);
+            pos.Execute();
+            return ((PosaljiSO)pos).Uspesno;
+        }
+
+        internal async Task<Odgovor> Pretrazi(string v)
         {
             SystemOperationsBase pob = new PretraziSO(v);
             pob.Execute();
-            return ((PretraziSO)pob).Uspesno;
+            return ((PretraziSO)pob).o;
         }
 
         internal async Task<List<Korisnik>> Prijatelji(Korisnik id)
