@@ -50,6 +50,13 @@ namespace Server
             pob.Execute();
             return ((PretraziSO)pob).o;
         }
+        internal async Task<string> Pretrazi(int v)
+        {
+            SystemOperationsBase pob = new PretraziSO(v);
+            pob.Execute();
+            return ((PretraziSO)pob).prinm;
+        }
+
 
         internal async Task<List<Korisnik>> Prijatelji(Korisnik id)
         {

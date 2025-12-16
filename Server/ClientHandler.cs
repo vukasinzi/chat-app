@@ -53,6 +53,19 @@ namespace Server
             }
         }
 
+        internal void babyConstructor(Socket s)
+        {
+            pushSocket = s;
+            pushSerializer = new JsonNetworkSerializer(pushSocket);
+        }
+        public Task PushAsync(Poruka p, CancellationToken token = default)
+        {
+            if (pushSocket == null || !pushSocket.Connected || pushSerializer == null)
+                return Task.CompletedTask;
+
+            return pushSerializer.SendAsync(p, token);
+        }
+
         private async Task<Odgovor> ProcessRequests(Zahtev z)
         {
             Odgovor o = new Odgovor();
@@ -69,9 +82,12 @@ namespace Server
                         }
                         o = await Kontroler.Instance.LogIn(l);
                         if (o.Uspesno)
-                            server.onlineUsers.Add(l.Korisnicko_ime.ToString());
-                        currentUser = l.Korisnicko_ime.ToString();
-
+                        {
+                            server.AddClient(this, l.Korisnicko_ime.ToString());
+                            currentUser = l.Korisnicko_ime.ToString();
+                           
+                        }
+                        
                         break;
                     case Operacija.Dostupnost:
                         o.Uspesno = await Kontroler.Instance.Dostupan(serializer.ReadType<Korisnik>((JsonElement)z.Objekat));
@@ -86,7 +102,16 @@ namespace Server
                         o.Rezultat = await Kontroler.Instance.Prijatelji(serializer.ReadType<Korisnik>((JsonElement)z.Objekat));
                         break;
                     case Operacija.Posalji:
-                        o.Uspesno = await Kontroler.Instance.Posalji(serializer.ReadType<Poruka>((JsonElement)z.Objekat));
+                        {
+                            Poruka p = serializer.ReadType<Poruka>((JsonElement)z.Objekat);
+                            o.Uspesno = await Kontroler.Instance.Posalji(p);
+                            if(o.Uspesno)
+                            {
+                                string primalacUsername = await Kontroler.Instance.Pretrazi(p.primalac_id);
+                                if (server.online.TryGetValue(primalacUsername, out var client))
+                                    await client.PushAsync(serializer.ReadType<Poruka>((JsonElement)z.Objekat));
+                            }
+                        }
                         break;
             
                 }

@@ -29,7 +29,7 @@ namespace Klijent
         private Socket pushSocket;
         private JsonNetworkSerializer pushSerializer;
         private CancellationTokenSource pushCts;
-
+        public event Action<Poruka> PorukaPrimljena;
 
         bool isConnected()
         {
@@ -89,7 +89,7 @@ namespace Klijent
             await pushSerializer.SendAsync(v, token);
 
             pushCts = new CancellationTokenSource();
-            Task.Run(() => HandlePush(pushCts.Token));
+            _ = Task.Run(() => HandlePush(pushCts.Token));
         }
 
         private async Task HandlePush(CancellationToken token)
@@ -97,7 +97,7 @@ namespace Klijent
             while(!token.IsCancellationRequested && pushSocket != null&&  pushSocket.Connected)
             {
                 Poruka p = await pushSerializer.ReceiveAsync<Poruka>(token);
-               //switch
+                PorukaPrimljena.Invoke(p);
             }
         }
 

@@ -6,6 +6,7 @@ using System.Diagnostics;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
+using Zajednicki;
 
 namespace Server
 {
@@ -14,7 +15,7 @@ namespace Server
         private Socket serverskiSocket;
         private Socket pushSocket;
         private CancellationTokenSource cts;
-        private ConcurrentDictionary<string,ClientHandler> online;
+        internal ConcurrentDictionary<string,ClientHandler> online;
 
         
         public Server()
@@ -44,6 +45,7 @@ namespace Server
         {
             cts = new CancellationTokenSource();
             var token = cts.Token;
+            _ = Task.Run(() => AcceptPushLoopAsync(token), token);
             try
             {
                 while (!token.IsCancellationRequested)
@@ -51,7 +53,7 @@ namespace Server
 
                     Socket klijentskiSocket = await serverskiSocket.AcceptAsync(token);
                     ClientHandler handler = new ClientHandler(klijentskiSocket, this);
-                    await handler.HandleRequests(token);
+                    _ = Task.Run(() => handler.HandleRequests(token), token);
 
                 }
             }
@@ -60,6 +62,32 @@ namespace Server
                 Debug.WriteLine(x.Message);
             }
         }
+
+        private async Task AcceptPushLoopAsync(CancellationToken token)
+        {
+            while (!token.IsCancellationRequested)
+            {
+                Socket s = await pushSocket.AcceptAsync(token);
+                var ser = new JsonNetworkSerializer(s);
+                try
+                {
+                    string username = await ser.ReceiveAsync<string>(token);
+                    if (online.TryGetValue(username, out var handler))
+                    {
+                        handler.babyConstructor(s); 
+                    }
+                    else
+                    {
+                        s.Close(); 
+                    }
+                }
+                catch
+                {
+                    try { s.Close(); } catch { }
+                }
+            }
+        }
+
         public void Stop()
         {
             try
@@ -102,10 +130,7 @@ namespace Server
 
         internal bool isOnline(Korisnik l, ClientHandler clientHandler)
         {
-            foreach (var x in online)
-                if (x.Key == l.Korisnicko_ime.ToString())
-                    return true;
-            return false;
+            return online.ContainsKey(l.Korisnicko_ime.ToString());
         }
     }
    

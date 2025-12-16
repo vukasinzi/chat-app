@@ -10,6 +10,8 @@ namespace SO
     public class PretraziSO : SystemOperationsBase
     {
         private string msgText;
+        int primalac;
+        public string prinm;
         Korisnik k = new Korisnik();
         public Odgovor o = new Odgovor();
         public PretraziSO(string msgText)
@@ -19,9 +21,16 @@ namespace SO
             k.koloneNaziv = "id,korisnicko_ime";
             k.kriterijumWhere = $"korisnicko_ime = '{k.Korisnicko_ime}'";
         }
+        public PretraziSO(int primalac)
+        {
+            this.primalac = primalac;
+            k.koloneNaziv = "korisnicko_ime";
+            k.kriterijumWhere = $"id = '{primalac}'";
+        }
         protected override void ExecuteConcreteOperation()
         {
             o.Rezultat = (Korisnik)broker.getCriteria(k);
+            prinm = ((Korisnik)o.Rezultat).Korisnicko_ime;
             if (o.Rezultat != null)
                 o.Uspesno = true;
 

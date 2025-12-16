@@ -13,6 +13,7 @@ namespace Klijent.Kontroleri_GUI_
     public class MainGuiKontroler
     {
         public static MainGuiKontroler instance;
+
         public static MainGuiKontroler Instance
         {
             get

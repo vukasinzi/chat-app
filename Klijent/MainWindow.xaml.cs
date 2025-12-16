@@ -12,15 +12,15 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
+using Zajednicki.Domen;
 
 namespace Klijent
 {
-    /// <summary>
-    /// Interaction logic for MainWindow.xaml
-    /// </summary>
+    
     public partial class MainWindow : Window
     {
         private Korisnik k;
+        private readonly Dictionary<int, List<Poruka>> chats = new();
         public MainWindow()
         {
             InitializeComponent();
@@ -29,7 +29,64 @@ namespace Klijent
         {
             InitializeComponent();
             this.k = k;
+       
+            Komunikacija.Instance.PorukaPrimljena += OnPorukaPrimljena;
+            this.Closed += (_, __) => Komunikacija.Instance.PorukaPrimljena -= OnPorukaPrimljena;
+        
         }
+
+        private void OnPorukaPrimljena(Poruka p)
+        {
+            Dispatcher.BeginInvoke(new Action(() =>
+            {
+                int otherId;
+                if (p.posiljalac_id == k.Id)
+                    otherId = p.primalac_id;
+                else
+                    otherId = p.posiljalac_id;
+
+                if (!chats.ContainsKey(otherId))
+                    chats[otherId] = new List<Poruka>();
+
+                chats[otherId].Add(p);
+
+                if (Kontakti.SelectedItem is ListBoxItem item &&
+                    item.Tag is Korisnik other &&
+                    other.Id == otherId)
+                {
+                    DodajPoruka(p);
+                }
+            }));
+        }
+
+        private void DodajPoruka(Poruka p)
+        {
+
+            bool incoming = p.posiljalac_id != k.Id;
+
+            Border bubble = new Border
+            {
+                Background = Brushes.Black,
+  
+                CornerRadius = new CornerRadius(6),
+                Padding = new Thickness(10, 6, 10, 6),
+                Margin = new Thickness(6),
+                HorizontalAlignment = incoming ? HorizontalAlignment.Left : HorizontalAlignment.Right,
+                MaxWidth = 420
+            };
+
+            TextBlock tb = new TextBlock
+            {
+                Text = p.poruka_text,
+                Foreground = Brushes.White,
+                TextWrapping = TextWrapping.Wrap
+            };
+
+            bubble.Child = tb;
+
+            PorukePanel.Children.Add(bubble);
+        }
+
 
         private void CloseButton_Click(object sender, RoutedEventArgs e)
         {
@@ -59,7 +116,8 @@ namespace Klijent
             ListBoxItem item = (ListBoxItem)Kontakti.SelectedItem;
             Korisnik primalac = (Korisnik)item.Tag;
             await MainGuiKontroler.Instance.Posalji(poruka_text, k.Id,primalac.Id);
-
+            Poruka p = new Poruka(primalac.Id, k.Id, poruka_text);
+            DodajPoruka(p);
 
         }
 
