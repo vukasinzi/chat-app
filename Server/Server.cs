@@ -1,5 +1,6 @@
 ﻿using Klijent.Domen;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Net;
@@ -11,15 +12,18 @@ namespace Server
     public class Server
     {
         private Socket serverskiSocket;
+        private Socket pushSocket;
         private CancellationTokenSource cts;
-        private List<ClientHandler> handleri;
-        internal List<string> onlineUsers;
+        private ConcurrentDictionary<string,ClientHandler> online;
+
         
         public Server()
         {
-            onlineUsers = new List<string>();
+            online = new ConcurrentDictionary<string, ClientHandler>();
+
             serverskiSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-            handleri = new List<ClientHandler>();
+            pushSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+          
 
         }
         public void Listen()
@@ -28,6 +32,8 @@ namespace Server
             {
                 serverskiSocket.Bind(new IPEndPoint(IPAddress.Parse("127.0.0.1"), 9999));
                 serverskiSocket.Listen();
+                pushSocket.Bind(new IPEndPoint(IPAddress.Parse("127.0.0.1"), 10000));
+                pushSocket.Listen();
             }
             catch (Exception x)
             {
@@ -45,9 +51,7 @@ namespace Server
 
                     Socket klijentskiSocket = await serverskiSocket.AcceptAsync(token);
                     ClientHandler handler = new ClientHandler(klijentskiSocket, this);
-                    lock (_lock)
-                        handleri.Add(handler);
-                    handler.HandleRequests(token);
+                    await handler.HandleRequests(token);
 
                 }
             }
@@ -63,19 +67,19 @@ namespace Server
                 cts?.Cancel();
             }
             catch { }
-            List<ClientHandler> copy = new List<ClientHandler>(handleri);
+            ConcurrentDictionary<string, ClientHandler> copy = new ConcurrentDictionary<string, ClientHandler>(online);
             foreach (var c in copy)
             {
                 try
                 {
-                    c.socket.Close();
+                    c.Value.socket.Close();
                 }
                 catch { }
             }
             lock (_lock)
-                handleri.Clear();
+                online.Clear();
             serverskiSocket.Close();
-            onlineUsers = new List<string>();
+            online = new ConcurrentDictionary<string, ClientHandler>();
         }
 
 
@@ -84,17 +88,22 @@ namespace Server
         {
             lock (_lock)
             {
-                handleri.Remove(clientHandler);
-                if(currentUser != null)
-                    onlineUsers.Remove(currentUser.ToString());
+                online.TryRemove(currentUser, out _);
 
+            }
+        }
+        internal void AddClient(ClientHandler clienthandler,string currentUser)
+        {
+            lock(_lock)
+            {
+                online.TryAdd(currentUser, clienthandler);
             }
         }
 
         internal bool isOnline(Korisnik l, ClientHandler clientHandler)
         {
-            foreach (var x in onlineUsers)
-                if (x == l.Korisnicko_ime.ToString())
+            foreach (var x in online)
+                if (x.Key == l.Korisnicko_ime.ToString())
                     return true;
             return false;
         }

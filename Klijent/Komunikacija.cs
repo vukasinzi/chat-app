@@ -26,6 +26,11 @@ namespace Klijent
         }
         public JsonNetworkSerializer serializer;
         Socket socket;
+        private Socket pushSocket;
+        private JsonNetworkSerializer pushSerializer;
+        private CancellationTokenSource pushCts;
+
+
         bool isConnected()
         {
             if (socket != null && socket.Connected)
@@ -60,6 +65,10 @@ namespace Klijent
                     Korisnik l = serializer.ReadType<Korisnik>(je);
                     odgovor.Rezultat = l;
                 }
+                if(odgovor.Uspesno)
+                {
+                    await PosaljiUsername(k.Korisnicko_ime.ToString(), token);
+                }
                 return odgovor;
             }
             catch (Exception ex)
@@ -70,7 +79,28 @@ namespace Klijent
             }
         }
 
-      
+        private async Task PosaljiUsername(string v, CancellationToken token)
+        {
+            if (pushSocket != null && pushSocket.Connected) return;
+
+            pushSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+            pushSocket.Connect("127.0.0.1", 10000);
+            pushSerializer = new JsonNetworkSerializer(pushSocket);
+            await pushSerializer.SendAsync(v, token);
+
+            pushCts = new CancellationTokenSource();
+            Task.Run(() => HandlePush(pushCts.Token));
+        }
+
+        private async Task HandlePush(CancellationToken token)
+        {
+            while(!token.IsCancellationRequested && pushSocket != null&&  pushSocket.Connected)
+            {
+                Poruka p = await pushSerializer.ReceiveAsync<Poruka>(token);
+               //switch
+            }
+        }
+
         internal async Task<Odgovor> RegistrujSe(Korisnik k)
         {
             try
@@ -112,7 +142,7 @@ namespace Klijent
             try
             {
                 Zahtev z = new Zahtev(Operacija.Pretraga, text);
-                serializer.SendAsync(z);
+                await serializer.SendAsync(z);
                 Odgovor o = await serializer.ReceiveAsync<Odgovor>();
                 Korisnik k = serializer.ReadType<Korisnik>((JsonElement)o.Rezultat);
                 o.Rezultat = k;
@@ -130,7 +160,7 @@ namespace Klijent
             try
             {
                 Zahtev z = new Zahtev(Operacija.Prijatelji,id);
-                serializer.SendAsync(z);
+                await serializer.SendAsync(z);
                 Odgovor o = await serializer.ReceiveAsync<Odgovor>();
                 if (o.Rezultat is JsonElement je)
                 {
@@ -155,7 +185,7 @@ namespace Klijent
                 z.Operacija = Operacija.Posalji;
                 Poruka p = new Poruka(primalac,posiljalac,pt);
                 z.Objekat = p;
-                serializer.SendAsync(z);
+                await serializer.SendAsync(z);
                 Odgovor o = await serializer.ReceiveAsync<Odgovor>();
                 return o;
             }

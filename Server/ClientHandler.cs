@@ -15,6 +15,8 @@ namespace Server
         private Server server;
         private string currentUser;
         private JsonNetworkSerializer serializer;
+        private Socket pushSocket;
+        private JsonNetworkSerializer pushSerializer;
 
         public ClientHandler(Socket socket,Server server)
         {
