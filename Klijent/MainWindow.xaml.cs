@@ -129,9 +129,10 @@ namespace Klijent
             coveculjak = await MainGuiKontroler.Instance.Pretrazi(SearchTextBox.Text);
             if (coveculjak.Korisnicko_ime == "greska")
                 return;
+            await MainGuiKontroler.Instance.DodajPrijatelja(coveculjak.Id,k.Id);
             foreach(ListBoxItem item in Kontakti.Items)
             {
-                if (item.Content == coveculjak.Korisnicko_ime)
+                if (item.Content.ToString() == coveculjak.Korisnicko_ime)
                     return;
             }
             ListBoxItem i = new ListBoxItem
@@ -156,6 +157,8 @@ namespace Klijent
         private async void Window_Loaded(object sender, RoutedEventArgs e)
         {
             await MainGuiKontroler.Instance.vratiSvePrijatelje(k);
+           
+
             foreach(Korisnik k in MainGuiKontroler.Instance.prijatelji)
             {
                 ListBoxItem i = new ListBoxItem
@@ -167,6 +170,18 @@ namespace Klijent
             }
          
 
+        }
+
+        private void Razgovori_Click(object sender, RoutedEventArgs e)
+        {
+            Kontakti.Visibility = Visibility.Visible;
+            Prijatelji.Visibility = Visibility.Collapsed;
+        }
+
+        private void PrijateljiBtn_Click(object sender, RoutedEventArgs e)
+        {
+            Kontakti.Visibility = Visibility.Collapsed;
+            Prijatelji.Visibility = Visibility.Visible;
         }
     }
 }

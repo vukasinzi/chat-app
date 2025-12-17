@@ -25,6 +25,11 @@ namespace Server
             this.server = server;
             serializer = new JsonNetworkSerializer(this.socket);
         }
+        internal void babyConstructor(Socket s)
+        {
+            pushSocket = s;
+            pushSerializer = new JsonNetworkSerializer(pushSocket);
+        }
         public async Task HandleRequests(CancellationToken token)
         {
             try
@@ -53,11 +58,6 @@ namespace Server
             }
         }
 
-        internal void babyConstructor(Socket s)
-        {
-            pushSocket = s;
-            pushSerializer = new JsonNetworkSerializer(pushSocket);
-        }
         public Task PushAsync(Poruka p, CancellationToken token = default)
         {
             if (pushSocket == null || !pushSocket.Connected || pushSerializer == null)

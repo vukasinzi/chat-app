@@ -82,5 +82,19 @@ namespace Klijent.Kontroleri_GUI_
                 return;
             }
         }
+
+        internal async Task DodajPrijatelja(int id, int id2)
+        {
+            try
+            {
+                Komunikacija.Instance.Connect();
+                //Odgovor o = await Komunikacija.instance.DodajPrijatelja(id,id2);
+
+            }
+            catch (Exception x)
+            {
+                return;
+            }
+        }
     }
 }

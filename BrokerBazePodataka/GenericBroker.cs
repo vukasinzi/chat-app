@@ -26,11 +26,11 @@ namespace BrokerBazePodataka
         public SqlCommand CreateCmd(string sql)
         {
             Open();
-            if (tran == null)
-                tran = con.BeginTransaction();
-            using var cmd = new SqlCommand(sql, con, tran);
-            return cmd;
+            tran ??= con.BeginTransaction();
+
+            return new SqlCommand(sql, con, tran);
         }
+
         public void Close()
         {
             tran?.Rollback();
@@ -62,6 +62,7 @@ namespace BrokerBazePodataka
             IObjekat result;
             string sql = $"select * from {obj.nazivTabele} where {obj.kriterijumWhere}";
             SqlCommand cmd = CreateCmd(sql);
+
             SqlDataReader dr = cmd.ExecuteReader();
             result = obj.vratiObjekat(dr);
             dr.Close();
@@ -73,19 +74,19 @@ namespace BrokerBazePodataka
              
             string sql = $"insert into {k.nazivTabele} values({k.vrednostiNaziv})";
             SqlCommand cmd = CreateCmd(sql);
+
             int affectedRows = cmd.ExecuteNonQuery();
             return affectedRows;
         }
-        public List<IObjekat> GetAllJoin(IObjekat obj,int id)//popravi. nije genericki uopste. uzasno. srediti i sql injection
+        public List<IObjekat> GetAllCriteria(IObjekat obj)
         {
             
             List<IObjekat> result;
-            string sql = $"select k.korisnicko_ime from Prijateljstvo p join Korisnik k on((p.korisnik1_id = {id} AND k.id = p.korisnik2_id)" +
-                $" or (p.korisnik2_id = {id} AND k.id = p.korisnik1_id)) " +
-                $"WHERE p.status = 'ACCEPTED';";
+            string sql = $"select {obj.koloneNaziv} from {obj.nazivTabele} where {obj.kriterijumWhere} ";
             SqlCommand cmd = CreateCmd(sql);
+   
             SqlDataReader dr = cmd.ExecuteReader();
-            result = obj.vratiObjekteJoin(dr);
+            result = obj.vratiObjekte(dr);
             dr.Close();
             return result;
         }

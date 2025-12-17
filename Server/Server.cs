@@ -73,17 +73,13 @@ namespace Server
                 {
                     string username = await ser.ReceiveAsync<string>(token);
                     if (online.TryGetValue(username, out var handler))
-                    {
                         handler.babyConstructor(s); 
-                    }
                     else
-                    {
                         s.Close(); 
-                    }
                 }
                 catch
                 {
-                    try { s.Close(); } catch { }
+                    s.Close();
                 }
             }
         }

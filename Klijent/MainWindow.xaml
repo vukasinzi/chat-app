@@ -59,6 +59,49 @@
             </Setter>
         </Style>
 
+        <!-- NEW: "tabs" style for Razgovori / Prijatelji -->
+        <Style x:Key="SidebarModeRadioStyle" TargetType="RadioButton">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="{StaticResource TextMuted}"/>
+            <Setter Property="BorderBrush" Value="{StaticResource PanelBorderBrush}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="FontSize" Value="11"/>
+            <Setter Property="Padding" Value="8,2"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="RadioButton">
+                        <Border Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="6">
+                            <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                              VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="#1FFFFFFF"/>
+                                <Setter Property="Foreground" Value="{StaticResource TextOnMedium}"/>
+                            </Trigger>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter Property="Background" Value="{StaticResource AccentStrongBrush}"/>
+                                <Setter Property="BorderBrush" Value="{StaticResource AccentStrongBrush}"/>
+                                <Setter Property="Foreground" Value="{StaticResource TextOnDark}"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter Property="Background" Value="#33FFFFFF"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="Opacity" Value="0.55"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
         <Style x:Key="IncomingBubble" TargetType="Border">
             <Setter Property="Background" Value="#202223"/>
             <Setter Property="CornerRadius" Value="12"/>
@@ -134,7 +177,9 @@
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="Auto"/>
+                        <!-- NEW: tabs -->
                         <RowDefinition Height="*"/>
+                        <!-- list area -->
                     </Grid.RowDefinitions>
 
                     <!-- SEARCH BAR -->
@@ -176,19 +221,62 @@
                         </Grid>
                     </Border>
 
-                    <TextBlock Grid.Row="1"
-                               Text="Razgovori"
-                               Foreground="{StaticResource TextOnMedium}"
-                               FontWeight="SemiBold"
-                               Margin="2,0,0,4"/>
+                    <!-- NEW: Razgovori / Prijatelji -->
+                    <Grid Grid.Row="1" Margin="0,0,0,8">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
 
-                    <ListBox x:Name="Kontakti"
-                     Grid.Row="2"
-                     Background="Transparent"
-                     BorderThickness="0"
-                     Foreground="{StaticResource TextOnDark}"
-                             SelectionChanged="Kontakti_SelectionChanged">  
-                    </ListBox>
+                        <RadioButton x:Name="RazgovoriBtn"
+                                     Grid.Column="0"
+                                     GroupName="SidebarMode"
+                                     Style="{StaticResource SidebarModeRadioStyle}"
+                                     Content="Razgovori"
+                                     IsChecked="True"
+                                     Margin="0,0,6,0" Click="Razgovori_Click"/>
+
+                        <RadioButton x:Name="PrijateljiBtn"
+                                     Grid.Column="1"
+                                     GroupName="SidebarMode"
+                                     Style="{StaticResource SidebarModeRadioStyle}"
+                                     Content="Prijatelji"
+                                     Margin="6,0,0,0" Click="PrijateljiBtn_Click"/>
+                    </Grid>
+
+                    <!-- LIST AREA: dva listbox-a, jedan se prikazuje -->
+                    <Grid Grid.Row="2">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="8*"/>
+                            <ColumnDefinition Width="19*"/>
+                        </Grid.ColumnDefinitions>
+                        <!-- Razgovori listbox (tvoj postojeci) -->
+                        <ListBox x:Name="Kontakti"
+                                 Background="Transparent"
+                                 BorderThickness="0"
+                                 Foreground="{StaticResource TextOnDark}"
+                                 SelectionChanged="Kontakti_SelectionChanged" Grid.ColumnSpan="2">
+                            <ListBox.Style>
+                                <Style TargetType="ListBox">
+                                    <Setter Property="Visibility" Value="Visible"/>
+                                    
+                                </Style>
+                            </ListBox.Style>
+                        </ListBox>
+
+                        <!-- Prijatelji listbox (novi) -->
+                        <ListBox x:Name="Prijatelji"
+                                 Background="Transparent"
+                                 BorderThickness="0"
+                                 Foreground="{StaticResource TextOnDark}" Grid.ColumnSpan="2">
+                            <ListBox.Style>
+                                <Style TargetType="ListBox">
+                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                   
+                                </Style>
+                            </ListBox.Style>
+                        </ListBox>
+                    </Grid>
                 </Grid>
             </Border>
 
@@ -210,13 +298,10 @@
                                         DockPanel.Dock="Left"
                                         VerticalAlignment="Center">
                                 <TextBlock x:Name="user"
-                                    Text="General"
+                                           Text=""
                                            FontSize="16"
                                            FontWeight="Bold"
                                            Foreground="{StaticResource TextOnDark}"/>
-                                <TextBlock Text="Online"
-                                           FontSize="11"
-                                           Foreground="{StaticResource TextMuted}"/>
                             </StackPanel>
                         </DockPanel>
                     </Border>
@@ -228,32 +313,19 @@
                             <StackPanel Orientation="Horizontal"
                                         HorizontalAlignment="Left"
                                         Margin="0,2">
-                                <Border Style="{StaticResource IncomingBubble}">
-                                    <TextBlock Text="Ćao, dobrodošao u dark mono chat demo."
-                                               Foreground="{StaticResource TextOnMedium}"
-                                               TextWrapping="Wrap"/>
-                                </Border>
+                                <Border Style="{StaticResource IncomingBubble}"/>
                             </StackPanel>
 
                             <StackPanel Orientation="Horizontal"
                                         HorizontalAlignment="Right"
                                         Margin="0,2">
-                                <Border Style="{StaticResource OutgoingBubble}">
-                                    <TextBlock Text="Testiram da li se prozor i crni layout ponašaju glatko."
-                                               Foreground="{StaticResource TextOnDark}"
-                                               TextWrapping="Wrap"/>
-                                </Border>
+                                <Border Style="{StaticResource OutgoingBubble}"/>
                             </StackPanel>
 
                             <StackPanel Orientation="Horizontal"
                                         HorizontalAlignment="Left"
                                         Margin="0,2">
-                                <Border Style="{StaticResource IncomingBubble}">
-                                    <TextBlock Text="Ako je pomeranje i resize bez trzanja, onda si miran što se WPF UI-a tiče."
-                                               Foreground="{StaticResource TextOnMedium}"
-                                               TextWrapping="Wrap"
-                                               Width="320"/>
-                                </Border>
+                                <Border Style="{StaticResource IncomingBubble}"/>
                             </StackPanel>
                         </StackPanel>
                     </ScrollViewer>
