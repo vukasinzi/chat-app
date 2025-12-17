@@ -65,6 +65,13 @@ namespace Server
             return ((VratiPrijateljeSO)pob).lista;
 
         }
+        internal async Task<bool> DodajPrijatelja(Prijateljstvo p)
+        {
+            SystemOperationsBase dod = new DodajPrijateljaSO(p);
+            dod.Execute();
+           return ((DodajPrijateljaSO)dod).Uspesno;
+
+        }
 
         internal async Task<bool> RegistrujSe(Korisnik korisnik)
         {

@@ -34,7 +34,21 @@ namespace Zajednicki.Domen
 
         public IObjekat vratiObjekat(SqlDataReader dr)
         {
-            throw new NotImplementedException();
+
+            Prijateljstvo p = null;
+            while (dr.Read())
+            {
+
+                p = new Prijateljstvo();
+                p.id_prijateljstvo = (int)dr["id_prijateljstva"];
+                p.korisnik1_id = (int)dr["korisnik1_id"];
+                p.korisnik2_id = (int)dr["korisnik2_id"];
+                p.status = (string)dr["status"];
+               
+            }
+            if (p == null)
+                return null;
+            return p;
         }
 
         public IObjekat vratiObjekatJoin(SqlDataReader dr)

@@ -83,17 +83,20 @@ namespace Klijent.Kontroleri_GUI_
             }
         }
 
-        internal async Task DodajPrijatelja(int id, int id2)
+        internal async Task<bool> DodajPrijatelja(int id, int id2)
         {
             try
             {
                 Komunikacija.Instance.Connect();
-                //Odgovor o = await Komunikacija.instance.DodajPrijatelja(id,id2);
-
+                Odgovor o = await Komunikacija.Instance.DodajPrijatelja(id,id2);
+                if (o.Uspesno)
+                    return true;
+                else
+                    throw new Exception("umri");
             }
             catch (Exception x)
             {
-                return;
+                return false;
             }
         }
     }

@@ -195,5 +195,27 @@ namespace Klijent
                 return o;
             }
         }
+
+        internal async Task<Odgovor> DodajPrijatelja(int id, int id2)
+        {
+            try
+            {
+                Zahtev z = new Zahtev();
+                z.Operacija = Operacija.DodajPrijatelja;
+                Prijateljstvo p = new Prijateljstvo();
+                p.status = "ceka se";
+                p.korisnik1_id = id;
+                p.korisnik2_id = id2;
+                z.Objekat = p;
+                await serializer.SendAsync(z);
+                Odgovor o = await serializer.ReceiveAsync<Odgovor>();
+                return o;
+            }
+            catch (Exception x)
+            {
+                Odgovor o = new Odgovor();
+                return o;
+            }
+        }
     }
 }

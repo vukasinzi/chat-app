@@ -129,22 +129,34 @@ namespace Klijent
             coveculjak = await MainGuiKontroler.Instance.Pretrazi(SearchTextBox.Text);
             if (coveculjak.Korisnicko_ime == "greska")
                 return;
-            await MainGuiKontroler.Instance.DodajPrijatelja(coveculjak.Id,k.Id);
-            foreach(ListBoxItem item in Kontakti.Items)
-            {
-                if (item.Content.ToString() == coveculjak.Korisnicko_ime)
-                    return;
-            }
-            ListBoxItem i = new ListBoxItem
-            {
-                Content = coveculjak.Korisnicko_ime,
-                Tag = coveculjak
-            };
-            Kontakti.Items.Add(i);
-            
-            
-        }
+           bool uspeh =  await MainGuiKontroler.Instance.DodajPrijatelja(coveculjak.Id,k.Id);
+            if (!uspeh)
+                return;
+            UcitajPrijatelje();
 
+        }
+        private async void UcitajPrijatelje()
+        {
+            try
+            {
+                await MainGuiKontroler.Instance.vratiSvePrijatelje(k);
+            }
+            catch (Exception x)
+            {
+                MessageBox.Show(x.Message);
+            }
+
+
+            foreach (Korisnik k in MainGuiKontroler.Instance.prijatelji)
+            {
+                ListBoxItem i = new ListBoxItem
+                {
+                    Content = k.Korisnicko_ime,
+                    Tag = k
+                };
+                Kontakti.Items.Add(i);
+            }
+        }
         private void Kontakti_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             ListBoxItem i = (ListBoxItem)Kontakti.SelectedItem;
@@ -156,26 +168,14 @@ namespace Klijent
 
         private async void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            await MainGuiKontroler.Instance.vratiSvePrijatelje(k);
-           
-
-            foreach(Korisnik k in MainGuiKontroler.Instance.prijatelji)
-            {
-                ListBoxItem i = new ListBoxItem
-                {
-                    Content = k.Korisnicko_ime,
-                    Tag = k
-                };
-                Kontakti.Items.Add(i);
-            }
-         
-
+            UcitajPrijatelje();
         }
 
-        private void Razgovori_Click(object sender, RoutedEventArgs e)
+        private async void Razgovori_Click(object sender, RoutedEventArgs e)
         {
             Kontakti.Visibility = Visibility.Visible;
             Prijatelji.Visibility = Visibility.Collapsed;
+            UcitajPrijatelje();
         }
 
         private void PrijateljiBtn_Click(object sender, RoutedEventArgs e)

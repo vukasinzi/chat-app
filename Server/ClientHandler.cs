@@ -113,7 +113,9 @@ namespace Server
                             }
                         }
                         break;
-            
+                    case Operacija.DodajPrijatelja:
+                        o.Uspesno = await Kontroler.Instance.DodajPrijatelja(serializer.ReadType<Prijateljstvo>((JsonElement)z.Objekat));
+                        break;
                 }
                 if (o.Poruka == "logovan")
                     throw new Exception("login exception");

@@ -11,6 +11,7 @@ namespace Zajednicki
         Dostupnost,
         Pretraga,
         Prijatelji,
-        Posalji
+        Posalji,
+        DodajPrijatelja
     };
 }
