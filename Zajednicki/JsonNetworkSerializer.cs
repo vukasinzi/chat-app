@@ -47,6 +47,11 @@ namespace Zajednicki
 
             return result;
         }
+        public T? ReadTypeStruct<T>(JsonElement el) where T : struct
+        {
+            if (el.ValueKind == JsonValueKind.Null) return null;
+            return JsonSerializer.Deserialize<T>(el.GetRawText());
+        }
 
         public void Close()
         {

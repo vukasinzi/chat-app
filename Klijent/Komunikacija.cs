@@ -154,6 +154,29 @@ namespace Klijent
                 return o;
             }
         }
+        internal async Task<Odgovor> Pretrazi(int id)
+        {
+            try
+            {
+                Zahtev z = new Zahtev(Operacija.Pretraga2, id);
+                await serializer.SendAsync(z);
+                Odgovor o = await serializer.ReceiveAsync<Odgovor>();
+                if (o.Rezultat is Korisnik)
+                {
+                    Korisnik k = serializer.ReadType<Korisnik>((JsonElement)o.Rezultat);
+                    o.Rezultat = k;
+                    return o;
+                }
+                else
+                    return o;
+            }
+            catch (Exception x)
+            {
+                Odgovor o = new Odgovor();
+                o.Poruka = "greska";
+                return o;
+            }
+        }
 
         internal async Task<Odgovor> vratiSvePrijatelje(Korisnik id)
         {
@@ -209,6 +232,30 @@ namespace Klijent
                 z.Objekat = p;
                 await serializer.SendAsync(z);
                 Odgovor o = await serializer.ReceiveAsync<Odgovor>();
+                return o;
+            }
+            catch (Exception x)
+            {
+                Odgovor o = new Odgovor();
+                return o;
+            }
+        }
+
+        internal async Task<Odgovor> ProveriNovePrijatelje(int id)
+        {
+            try
+            {
+                Zahtev z = new Zahtev();
+                z.Operacija = Operacija.VratiZahtevePrijatelja;
+
+                z.Objekat = id;
+                await serializer.SendAsync(z);
+                Odgovor o = await serializer.ReceiveAsync<Odgovor>();
+                if (o.Rezultat is JsonElement je)
+                {
+                    List<Prijateljstvo> l = serializer.ReadType<List<Prijateljstvo>>(je);
+                    o.Rezultat = l;
+                }
                 return o;
             }
             catch (Exception x)

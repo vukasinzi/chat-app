@@ -98,6 +98,9 @@ namespace Server
                     case Operacija.Pretraga:
                         o = await Kontroler.Instance.Pretrazi(serializer.ReadType<string>((JsonElement)z.Objekat));
                         break;
+                    case Operacija.Pretraga2:
+                        o.Rezultat = await Kontroler.Instance.Pretrazi((int)serializer.ReadTypeStruct<int>((JsonElement)z.Objekat));
+                        break;
                     case Operacija.Prijatelji:
                         o.Rezultat = await Kontroler.Instance.Prijatelji(serializer.ReadType<Korisnik>((JsonElement)z.Objekat));
                         break;
@@ -115,6 +118,9 @@ namespace Server
                         break;
                     case Operacija.DodajPrijatelja:
                         o.Uspesno = await Kontroler.Instance.DodajPrijatelja(serializer.ReadType<Prijateljstvo>((JsonElement)z.Objekat));
+                        break;
+                    case Operacija.VratiZahtevePrijatelja:
+                        o.Rezultat = await Kontroler.Instance.VratiZahtevePrijatelja(serializer.ReadTypeStruct<int>((JsonElement)z.Objekat));
                         break;
                 }
                 if (o.Poruka == "logovan")

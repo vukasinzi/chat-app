@@ -12,6 +12,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
+using Zajednicki;
 using Zajednicki.Domen;
 
 namespace Klijent
@@ -129,7 +130,7 @@ namespace Klijent
             coveculjak = await MainGuiKontroler.Instance.Pretrazi(SearchTextBox.Text);
             if (coveculjak.Korisnicko_ime == "greska")
                 return;
-           bool uspeh =  await MainGuiKontroler.Instance.DodajPrijatelja(coveculjak.Id,k.Id);
+           bool uspeh =  await MainGuiKontroler.Instance.DodajPrijatelja(k.Id,coveculjak.Id);
             if (!uspeh)
                 return;
             UcitajPrijatelje();
@@ -146,7 +147,7 @@ namespace Klijent
                 MessageBox.Show(x.Message);
             }
 
-
+            Kontakti.Items.Clear();
             foreach (Korisnik k in MainGuiKontroler.Instance.prijatelji)
             {
                 ListBoxItem i = new ListBoxItem
@@ -177,11 +178,85 @@ namespace Klijent
             Prijatelji.Visibility = Visibility.Collapsed;
             UcitajPrijatelje();
         }
+        private ListBoxItem DinamickiItem(string v, Prijateljstvo p)
+        {
+            var grid = new Grid();
+            grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+            grid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
+            grid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
 
-        private void PrijateljiBtn_Click(object sender, RoutedEventArgs e)
+            var txt = new TextBlock
+            {
+                Text = v,
+                VerticalAlignment = VerticalAlignment.Center,
+                FontSize = 13,
+                TextTrimming = TextTrimming.CharacterEllipsis,
+                Margin = new Thickness(8, 0, 8, 0)
+            };
+            Grid.SetColumn(txt, 0);
+
+            var btnAccept = new Button
+            {
+                Content = "✓",
+                ToolTip = "Prihvati",
+                Tag = p,
+                Style = (Style)FindResource("CircleActionButton"),
+                Margin = new Thickness(3, 0, 0, 0),
+                Foreground = Brushes.Green
+            };
+           // btnAccept.Click += Accept_Click;
+            Grid.SetColumn(btnAccept, 1);
+
+            var btnDecline = new Button
+            {
+                Content = "×",
+                ToolTip = "Odbij",
+                Tag = p,
+                Style = (Style)FindResource("CircleActionButton"),
+                Margin = new Thickness(3, 0, 0, 0),
+                Foreground = Brushes.Red
+
+
+            };
+           // btnDecline.Click += Decline_Click;
+            Grid.SetColumn(btnDecline, 2);
+
+            grid.Children.Add(txt);
+            grid.Children.Add(btnAccept);
+            grid.Children.Add(btnDecline);
+
+            return new ListBoxItem
+            {
+                Content = grid,
+                Tag = p,
+                Padding = new Thickness(6),
+                Margin = new Thickness(2),
+                MinHeight = 40
+            };
+        }
+        async void ProveriNovePrijatelje()
+        {
+            Odgovor o = await Komunikacija.Instance.ProveriNovePrijatelje(k.Id);
+            List<Prijateljstvo> naCekanju = (List<Prijateljstvo>)o.Rezultat;
+            if (naCekanju.Count == 0)
+                return;
+            Prijatelji.Items.Clear();
+            foreach(Prijateljstvo p in naCekanju)
+            {
+                Odgovor k = await Komunikacija.Instance.Pretrazi(p.korisnik1_id);
+                string? v = k.Rezultat.ToString();
+
+                Prijatelji.Items.Add(DinamickiItem(v, p));
+            }
+        }
+        private async void PrijateljiBtn_Click(object sender, RoutedEventArgs e)
         {
             Kontakti.Visibility = Visibility.Collapsed;
             Prijatelji.Visibility = Visibility.Visible;
+            ProveriNovePrijatelje();
+
         }
+
+     
     }
 }

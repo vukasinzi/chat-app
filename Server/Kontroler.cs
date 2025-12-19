@@ -50,6 +50,7 @@ namespace Server
             pob.Execute();
             return ((PretraziSO)pob).o;
         }
+
         internal async Task<string> Pretrazi(int v)
         {
             SystemOperationsBase pob = new PretraziSO(v);
@@ -78,6 +79,14 @@ namespace Server
             SystemOperationsBase rog = new RegistrujSeSO(korisnik);
             rog.Execute();
             return ((RegistrujSeSO)rog).Uspesno;
+        }
+
+        internal async Task<List<Prijateljstvo>> VratiZahtevePrijatelja(int? id)
+        {
+            SystemOperationsBase vog = new VratiZahtevePrijateljaSO(id);
+            vog.Execute();
+            return ((VratiZahtevePrijateljaSO)vog).listaPrijatelja;
+
         }
     }
 }
