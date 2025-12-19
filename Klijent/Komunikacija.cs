@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.Net.Sockets;
 using System.Text;
 using System.Text.Json;
+using System.Windows;
 using Zajednicki;
 using Zajednicki.Domen;
 
@@ -144,6 +145,8 @@ namespace Klijent
                 Zahtev z = new Zahtev(Operacija.Pretraga, text);
                 await serializer.SendAsync(z);
                 Odgovor o = await serializer.ReceiveAsync<Odgovor>();
+                if (o.Rezultat == null)
+                    return null;
                 Korisnik k = serializer.ReadType<Korisnik>((JsonElement)o.Rezultat);
                 o.Rezultat = k;
                 return o;
@@ -168,7 +171,10 @@ namespace Klijent
                     return o;
                 }
                 else
+                {
+                    o.Rezultat = serializer.ReadType<string>((JsonElement)o.Rezultat);
                     return o;
+                }
             }
             catch (Exception x)
             {
@@ -256,6 +262,44 @@ namespace Klijent
                     List<Prijateljstvo> l = serializer.ReadType<List<Prijateljstvo>>(je);
                     o.Rezultat = l;
                 }
+                return o;
+            }
+            catch (Exception x)
+            {
+                Odgovor o = new Odgovor();
+                return o;
+            }
+        }
+
+        internal async Task<Odgovor> PrihvatiPrijatelja(Prijateljstvo prijatelj)
+        {
+            try
+            {
+                Zahtev z = new Zahtev();
+                z.Operacija = Operacija.PrihvatiPrijatelja;
+
+                z.Objekat = prijatelj;
+                await serializer.SendAsync(z);
+                Odgovor o = await serializer.ReceiveAsync<Odgovor>();
+                return o;
+            }
+            catch (Exception x)
+            {
+                Odgovor o = new Odgovor();
+                return o;
+            }
+        }
+
+        internal async Task<Odgovor> OdbijPrijatelja(Prijateljstvo prijatelj)
+        {
+            try
+            {
+                Zahtev z = new Zahtev();
+                z.Operacija = Operacija.OdbijPrijatelja;
+
+                z.Objekat = prijatelj;
+                await serializer.SendAsync(z);
+                Odgovor o = await serializer.ReceiveAsync<Odgovor>();
                 return o;
             }
             catch (Exception x)

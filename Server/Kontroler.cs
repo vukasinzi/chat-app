@@ -88,5 +88,19 @@ namespace Server
             return ((VratiZahtevePrijateljaSO)vog).listaPrijatelja;
 
         }
+        internal async Task<bool> PrihvatiPrijatelja(Prijateljstvo p)
+        {
+            SystemOperationsBase pog = new PrihvatiPrijateljaSO(p);
+            pog.Execute();
+            return ((PrihvatiPrijateljaSO)pog).Uspesno; 
+
+        }
+
+        internal async Task<bool> OdbijPrijatelja(Prijateljstvo prijateljstvo)
+        {
+            SystemOperationsBase oog = new OdbijPrijateljaSO(prijateljstvo);
+            oog.Execute();
+            return ((OdbijPrijateljaSO)oog).Uspesno;
+        }
     }
 }

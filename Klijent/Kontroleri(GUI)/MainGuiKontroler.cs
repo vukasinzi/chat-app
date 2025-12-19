@@ -7,6 +7,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using Zajednicki;
+using Zajednicki.Domen;
 
 namespace Klijent.Kontroleri_GUI_
 {
@@ -33,10 +34,11 @@ namespace Klijent.Kontroleri_GUI_
                     throw new Exception("aaa");
                 Komunikacija.Instance.Connect();
                 Odgovor o = await Komunikacija.Instance.Pretrazi(msgtext);
-                if (!o.Uspesno)
+                if (o == null || !o.Uspesno)
                 {
                     MessageBox.Show("Ne postoji korisnik sa tim korisnickim imenom.");
                     throw new Exception("aaa");
+                    return null;
                 }
                 Korisnik l = (Korisnik)o.Rezultat;
                 return l;
@@ -47,7 +49,24 @@ namespace Klijent.Kontroleri_GUI_
                 return null;
             }
         }
+        internal async Task<string> Pretrazi(int id)
+        {
+            try
+            {
+               
+                Komunikacija.Instance.Connect();
+                Odgovor o = await Komunikacija.Instance.Pretrazi(id);
+                if (o == null)
+                    return null;
+                return (string)o.Rezultat;
+               
 
+            }
+            catch (Exception x)
+            {
+                return null;
+            }
+        }
         internal async Task vratiSvePrijatelje(Korisnik id)
         {
             try
@@ -95,6 +114,60 @@ namespace Klijent.Kontroleri_GUI_
                     throw new Exception("umri");
             }
             catch (Exception x)
+            {
+                return false;
+            }
+        }
+
+        internal async Task<Odgovor> ProveriNovePrijatelje(int id)
+        {
+            try
+            {
+                Komunikacija.Instance.Connect();
+                Odgovor o = await Komunikacija.Instance.ProveriNovePrijatelje(id);
+                if (o != null)
+                    return o;
+                else
+                    throw new Exception("umri");
+
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        internal async Task<bool> PrihvatiPrijatelja(Prijateljstvo prijatelj)
+        {
+            try
+            {
+                Komunikacija.Instance.Connect();
+                Odgovor o = await Komunikacija.Instance.PrihvatiPrijatelja(prijatelj);
+                if (o.Uspesno)
+                    return true;
+                else
+                    throw new Exception("umri");
+
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        internal async Task<bool> OdbijPrijatelja(Prijateljstvo prijatelj)
+        {
+            try
+            {
+                Komunikacija.Instance.Connect();
+                Odgovor o = await Komunikacija.Instance.OdbijPrijatelja(prijatelj);
+                if (o.Uspesno)
+                    return true;
+                else
+                    throw new Exception("umri");
+
+            }
+            catch
             {
                 return false;
             }

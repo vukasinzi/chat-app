@@ -119,7 +119,7 @@ namespace Klijent
             await MainGuiKontroler.Instance.Posalji(poruka_text, k.Id,primalac.Id);
             Poruka p = new Poruka(primalac.Id, k.Id, poruka_text);
             DodajPoruka(p);
-
+            messageText.Clear();
         }
 
         private async void SearchButton_Click(object sender, RoutedEventArgs e)
@@ -128,12 +128,14 @@ namespace Klijent
                 return;
             Korisnik coveculjak = new Korisnik();
             coveculjak = await MainGuiKontroler.Instance.Pretrazi(SearchTextBox.Text);
-            if (coveculjak.Korisnicko_ime == "greska")
+            if (coveculjak == null || coveculjak.Korisnicko_ime == "greska")
                 return;
            bool uspeh =  await MainGuiKontroler.Instance.DodajPrijatelja(k.Id,coveculjak.Id);
             if (!uspeh)
                 return;
             UcitajPrijatelje();
+            MessageBox.Show("Uspešno poslat zahtev za prijateljstvo korisniku - ", SearchTextBox.Text);
+            SearchTextBox.Clear();
 
         }
         private async void UcitajPrijatelje()
@@ -150,11 +152,29 @@ namespace Klijent
             Kontakti.Items.Clear();
             foreach (Korisnik k in MainGuiKontroler.Instance.prijatelji)
             {
+                var grid = new Grid();
+                grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+                grid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
+                grid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
+
+                var txt = new TextBlock
+                {
+                    Text =k.Korisnicko_ime,
+                    VerticalAlignment = VerticalAlignment.Center,
+                    FontSize = 13,
+                    TextTrimming = TextTrimming.CharacterEllipsis,
+                    Margin = new Thickness(8, 0, 8, 0)
+                };
+                Grid.SetColumn(txt, 0);
                 ListBoxItem i = new ListBoxItem
                 {
-                    Content = k.Korisnicko_ime,
-                    Tag = k
+                    Content = grid,
+                    Tag = k,
+                    Padding = new Thickness(6),
+                    Margin = new Thickness(2),
+                    MinHeight = 40
                 };
+                grid.Children.Add(txt);
                 Kontakti.Items.Add(i);
             }
         }
@@ -162,8 +182,11 @@ namespace Klijent
         {
             ListBoxItem i = (ListBoxItem)Kontakti.SelectedItem;
 
-            user.Text = i.Content.ToString();
-            PorukePanel.Children.Clear();
+            if (Kontakti.SelectedItem is ListBoxItem item && item.Tag is Korisnik k)
+            {
+                user.Text = k.Korisnicko_ime;   
+                PorukePanel.Children.Clear();
+            }
         }
         
 
@@ -204,7 +227,7 @@ namespace Klijent
                 Margin = new Thickness(3, 0, 0, 0),
                 Foreground = Brushes.Green
             };
-           // btnAccept.Click += Accept_Click;
+            btnAccept.Click += Accept_Click;
             Grid.SetColumn(btnAccept, 1);
 
             var btnDecline = new Button
@@ -218,7 +241,7 @@ namespace Klijent
 
 
             };
-           // btnDecline.Click += Decline_Click;
+           btnDecline.Click += Decline_Click;
             Grid.SetColumn(btnDecline, 2);
 
             grid.Children.Add(txt);
@@ -234,18 +257,36 @@ namespace Klijent
                 MinHeight = 40
             };
         }
+
+        private async void Decline_Click(object sender, RoutedEventArgs e)
+        {
+            var btn = (Button)sender;
+            var prijatelj = (Prijateljstvo)btn.Tag;
+            bool uspesno = await MainGuiKontroler.Instance.OdbijPrijatelja(prijatelj);
+            if (uspesno)
+                ProveriNovePrijatelje();
+        }
+
+        private async void Accept_Click(object sender, RoutedEventArgs e)
+        {
+            var btn = (Button)sender;
+            var prijatelj = (Prijateljstvo)btn.Tag;
+            bool uspesno = await MainGuiKontroler.Instance.PrihvatiPrijatelja(prijatelj);
+            if (uspesno)
+                ProveriNovePrijatelje();
+
+        }
+
         async void ProveriNovePrijatelje()
         {
-            Odgovor o = await Komunikacija.Instance.ProveriNovePrijatelje(k.Id);
+            Odgovor o = await MainGuiKontroler.Instance.ProveriNovePrijatelje(k.Id);
             List<Prijateljstvo> naCekanju = (List<Prijateljstvo>)o.Rezultat;
+            Prijatelji.Items.Clear();
             if (naCekanju.Count == 0)
                 return;
-            Prijatelji.Items.Clear();
             foreach(Prijateljstvo p in naCekanju)
             {
-                Odgovor k = await Komunikacija.Instance.Pretrazi(p.korisnik1_id);
-                string? v = k.Rezultat.ToString();
-
+                string v = await MainGuiKontroler.Instance.Pretrazi(p.korisnik1_id);
                 Prijatelji.Items.Add(DinamickiItem(v, p));
             }
         }

@@ -14,6 +14,8 @@ namespace Zajednicki
         Posalji,
         DodajPrijatelja,
         VratiZahtevePrijatelja,
-        Pretraga2
+        Pretraga2,
+        PrihvatiPrijatelja,
+        OdbijPrijatelja
     };
 }

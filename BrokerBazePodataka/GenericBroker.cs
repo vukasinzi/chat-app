@@ -90,5 +90,23 @@ namespace BrokerBazePodataka
             dr.Close();
             return result;
         }
+
+        public int UpdateCriteria(IObjekat obj)
+        {
+            string sql = $"update {obj.nazivTabele} set {obj.vrednostiNaziv} where {obj.kriterijumWhere}";
+            SqlCommand cmd = CreateCmd(sql);
+
+            int affectedRows = cmd.ExecuteNonQuery();
+            return affectedRows;
+        }
+
+        public int DeleteCriteria(IObjekat obj)
+        {
+            string sql = $"delete from {obj.nazivTabele} where {obj.kriterijumWhere}";
+            SqlCommand cmd = CreateCmd(sql);
+
+            int affectedRows = cmd.ExecuteNonQuery();
+            return affectedRows;
+        }
     }
 }

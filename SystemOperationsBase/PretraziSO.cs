@@ -30,10 +30,11 @@ namespace SO
         protected override void ExecuteConcreteOperation()
         {
             o.Rezultat = (Korisnik)broker.getCriteria(k);
-            prinm = ((Korisnik)o.Rezultat).Korisnicko_ime;
             if (o.Rezultat != null)
+            {
+                prinm = ((Korisnik)o.Rezultat).Korisnicko_ime;
                 o.Uspesno = true;
-
+            }
         }
     }
 }
