@@ -45,7 +45,7 @@ namespace Klijent.Kontroleri_GUI_
                 }
                 else
                 {
-                    MessageBox.Show("Uspesno logovanje. Dobrodosli - " + k.Korisnicko_ime + ".");
+                    MessageBox.Show("Uspesno logovanje. Dobro dosli, " + k.Korisnicko_ime + ".");
                     Korisnik l = (Korisnik)o.Rezultat;
                     MainWindow window = new MainWindow(l);
                     window.Show();
@@ -81,6 +81,7 @@ namespace Klijent.Kontroleri_GUI_
                 Odgovor o = await Komunikacija.Instance.RegistrujSe(k);
                 if (o.Uspesno)
                 {
+                    MessageBox.Show("Uspesna registracija. Dobro dosli, " + k.Korisnicko_ime + ".");
                     Korisnik l = (Korisnik)o.Rezultat;
                     MainWindow window = new MainWindow(l);
                     window.Show();

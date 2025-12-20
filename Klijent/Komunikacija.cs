@@ -109,7 +109,11 @@ namespace Klijent
                 Zahtev z = new Zahtev(Operacija.RegistrujSe, k);
                 await serializer.SendAsync(z);
                 Odgovor o = await serializer.ReceiveAsync<Odgovor>();
-
+                if (o.Rezultat is JsonElement je)
+                {
+                    Korisnik l = serializer.ReadType<Korisnik>(je);
+                    o.Rezultat = l;
+                }
                 return o;
             }
             catch(Exception x)

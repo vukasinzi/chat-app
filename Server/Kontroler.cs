@@ -74,11 +74,11 @@ namespace Server
 
         }
 
-        internal async Task<bool> RegistrujSe(Korisnik korisnik)
+        internal async Task<Odgovor> RegistrujSe(Korisnik korisnik)
         {
             SystemOperationsBase rog = new RegistrujSeSO(korisnik);
             rog.Execute();
-            return ((RegistrujSeSO)rog).Uspesno;
+            return ((RegistrujSeSO)rog).o;
         }
 
         internal async Task<List<Prijateljstvo>> VratiZahtevePrijatelja(int? id)

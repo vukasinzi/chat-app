@@ -402,9 +402,7 @@
 
                             <StackPanel Orientation="Horizontal"
                                         HorizontalAlignment="Right"
-                                        Margin="0,2">
-                                <Border Style="{StaticResource OutgoingBubble}"/>
-                            </StackPanel>
+                                        Margin="0,2"/>
 
                             <StackPanel Orientation="Horizontal"
                                         HorizontalAlignment="Left"
