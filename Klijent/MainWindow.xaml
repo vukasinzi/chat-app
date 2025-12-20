@@ -3,19 +3,30 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:Klijent"
+        xmlns:shell="clr-namespace:System.Windows.Shell;assembly=PresentationFramework"
         mc:Ignorable="d"
         Title="Chat"
         Height="650"
         Width="1200"
         Background="#101011"
         WindowStyle="None"
-        ResizeMode="CanResizeWithGrip"
-        AllowsTransparency="False" Loaded="Window_Loaded">
- 
+        ResizeMode="CanResize"
+        AllowsTransparency="False"
+        SnapsToDevicePixels="True"
+        UseLayoutRounding="True"
+        MaxWidth="{x:Static SystemParameters.MaximizedPrimaryScreenWidth}"
+        MaxHeight="{x:Static SystemParameters.MaximizedPrimaryScreenHeight}"
 
-        <Window.Resources>
-            
+        Loaded="Window_Loaded">
+
+    <shell:WindowChrome.WindowChrome>
+        <shell:WindowChrome CaptionHeight="32"
+                            CornerRadius="0"
+                            GlassFrameThickness="0"
+                            ResizeBorderThickness="{x:Static SystemParameters.WindowResizeBorderThickness}"/>
+    </shell:WindowChrome.WindowChrome>
+
+    <Window.Resources>
         <SolidColorBrush x:Key="PrimaryBackground" Color="#101011"/>
         <SolidColorBrush x:Key="TitleBarBackground" Color="#070708"/>
         <SolidColorBrush x:Key="SidebarBackground" Color="#161717"/>
@@ -63,7 +74,6 @@
             </Setter>
         </Style>
 
-        
         <Style x:Key="SidebarModeRadioStyle" TargetType="RadioButton">
             <Setter Property="Background" Value="Transparent"/>
             <Setter Property="Foreground" Value="{StaticResource TextMuted}"/>
@@ -119,6 +129,7 @@
             <Setter Property="Padding" Value="8,4"/>
             <Setter Property="Margin" Value="4,2"/>
         </Style>
+
         <SolidColorBrush x:Key="UiText" Color="#E6E6E6"/>
         <SolidColorBrush x:Key="UiBorder" Color="#2A2A2C"/>
         <SolidColorBrush x:Key="UiBtnBg" Color="#1C1C1E"/>
@@ -141,12 +152,12 @@
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
                         <Border x:Name="bd"
-                         Background="{TemplateBinding Background}"
-                         BorderBrush="{TemplateBinding BorderBrush}"
-                         BorderThickness="{TemplateBinding BorderThickness}"
-                         CornerRadius="999">
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="999">
                             <ContentPresenter HorizontalAlignment="Center"
-                                       VerticalAlignment="Center"/>
+                                              VerticalAlignment="Center"/>
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
@@ -163,6 +174,7 @@
                 </Setter.Value>
             </Setter>
         </Style>
+
         <Style TargetType="ListBoxItem">
             <Setter Property="SnapsToDevicePixels" Value="True"/>
             <Setter Property="Background" Value="Transparent"/>
@@ -177,14 +189,14 @@
                 <Setter.Value>
                     <ControlTemplate TargetType="ListBoxItem">
                         <Border x:Name="Bd"
-                        Background="{TemplateBinding Background}"
-                        BorderBrush="{TemplateBinding BorderBrush}"
-                        BorderThickness="{TemplateBinding BorderThickness}"
-                        CornerRadius="8">
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="8">
                             <ContentPresenter
-                        Margin="{TemplateBinding Padding}"
-                        HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
-                        VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
+                                Margin="{TemplateBinding Padding}"
+                                HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
@@ -211,7 +223,6 @@
                 </Setter.Value>
             </Setter>
         </Style>
-
     </Window.Resources>
 
     <Grid Background="{StaticResource PrimaryBackground}">
@@ -220,7 +231,9 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <Border Grid.Row="0" Background="{StaticResource TitleBarBackground}">
+        <Border Grid.Row="0"
+                Background="{StaticResource TitleBarBackground}"
+                MouseLeftButtonDown="TitleBar_MouseLeftButtonDown">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
@@ -244,26 +257,31 @@
                 </StackPanel>
 
                 <Button Grid.Column="1"
+                        shell:WindowChrome.IsHitTestVisibleInChrome="True"
                         Style="{StaticResource WindowButtonStyle}"
                         Click="MinimizeButton_Click"
                         Content="&#x2013;"/>
 
                 <Button Grid.Column="2"
+                        shell:WindowChrome.IsHitTestVisibleInChrome="True"
                         Style="{StaticResource WindowButtonStyle}"
                         Click="MaximizeButton_Click"
                         Content="&#x25A1;"/>
 
                 <Button Grid.Column="3"
+                        shell:WindowChrome.IsHitTestVisibleInChrome="True"
                         Style="{StaticResource WindowButtonStyle}"
                         Click="CloseButton_Click"
                         Content="X"/>
             </Grid>
         </Border>
+
         <Grid Grid.Row="1">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="260"/>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
+
             <Border Grid.Column="0"
                     Background="{StaticResource SidebarBackground}"
                     BorderBrush="{StaticResource PanelBorderBrush}"
@@ -274,6 +292,7 @@
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="*"/>
                     </Grid.RowDefinitions>
+
                     <Border Grid.Row="0"
                             Background="#202120"
                             CornerRadius="6"
@@ -284,6 +303,7 @@
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="Auto"/>
                             </Grid.ColumnDefinitions>
+
                             <TextBox x:Name="SearchTextBox"
                                      Grid.Column="0"
                                      Margin="4,0,4,0"
@@ -310,6 +330,7 @@
                             </Button>
                         </Grid>
                     </Border>
+
                     <Grid Grid.Row="1" Margin="0,0,0,8">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>
@@ -322,44 +343,38 @@
                                      Style="{StaticResource SidebarModeRadioStyle}"
                                      Content="Razgovori"
                                      IsChecked="True"
-                                     Margin="0,0,6,0" Click="Razgovori_Click"/>
+                                     Margin="0,0,6,0"
+                                     Click="Razgovori_Click"/>
 
                         <RadioButton x:Name="PrijateljiBtn"
                                      Grid.Column="1"
                                      GroupName="SidebarMode"
                                      Style="{StaticResource SidebarModeRadioStyle}"
                                      Content="Prijatelji"
-                                     Margin="6,0,0,0" Click="PrijateljiBtn_Click"/>
+                                     Margin="6,0,0,0"
+                                     Click="PrijateljiBtn_Click"/>
                     </Grid>
+
                     <Grid Grid.Row="2">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="8*"/>
                             <ColumnDefinition Width="19*"/>
                         </Grid.ColumnDefinitions>
+
                         <ListBox x:Name="Kontakti"
                                  Background="Transparent"
                                  BorderThickness="0"
                                  Foreground="{StaticResource TextOnDark}"
-                                 SelectionChanged="Kontakti_SelectionChanged" Grid.ColumnSpan="2">
-                            <ListBox.Style>
-                                <Style TargetType="ListBox">
-                                    <Setter Property="Visibility" Value="Visible"/>
+                                 SelectionChanged="Kontakti_SelectionChanged"
+                                 Grid.ColumnSpan="2"/>
 
-                                </Style>
-                            </ListBox.Style>
-                        </ListBox>
                         <ListBox x:Name="Prijatelji"
                                  Background="Transparent"
                                  BorderThickness="0"
                                  HorizontalContentAlignment="Stretch"
-                                 Foreground="{StaticResource TextOnDark}" Grid.ColumnSpan="2">
-                            <ListBox.Style>
-                                <Style TargetType="ListBox">
-                                    <Setter Property="Visibility" Value="Collapsed"/>
-                                   
-                                </Style>
-                            </ListBox.Style>
-                        </ListBox>
+                                 Foreground="{StaticResource TextOnDark}"
+                                 Grid.ColumnSpan="2"
+                                 Visibility="Collapsed"/>
                     </Grid>
                 </Grid>
             </Border>
@@ -393,23 +408,7 @@
                     <ScrollViewer Grid.Row="1"
                                   Background="{StaticResource ChatBackground}"
                                   VerticalScrollBarVisibility="Auto">
-                        <StackPanel x:Name="PorukePanel" Margin="12,8,12,8">
-                            <StackPanel Orientation="Horizontal"
-                                        HorizontalAlignment="Left"
-                                        Margin="0,2">
-                                <Border Style="{StaticResource IncomingBubble}"/>
-                            </StackPanel>
-
-                            <StackPanel Orientation="Horizontal"
-                                        HorizontalAlignment="Right"
-                                        Margin="0,2"/>
-
-                            <StackPanel Orientation="Horizontal"
-                                        HorizontalAlignment="Left"
-                                        Margin="0,2">
-                                <Border Style="{StaticResource IncomingBubble}"/>
-                            </StackPanel>
-                        </StackPanel>
+                        <StackPanel x:Name="PorukePanel" Margin="12,8,12,8"/>
                     </ScrollViewer>
 
                     <Border Grid.Row="2"
@@ -444,7 +443,9 @@
                                     Foreground="{StaticResource TextOnDark}"
                                     BorderThickness="0"
                                     Cursor="Hand"
-                                    Click="Send_Click" Margin="0,2,0,0" VerticalAlignment="Top"/>
+                                    Click="Send_Click"
+                                    Margin="0,2,0,0"
+                                    VerticalAlignment="Top"/>
                         </Grid>
                     </Border>
                 </Grid>

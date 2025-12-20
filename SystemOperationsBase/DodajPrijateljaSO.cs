@@ -16,8 +16,8 @@ namespace SO
         protected override void ExecuteConcreteOperation()
         {
             p.vrednostiNaziv = $"{p.korisnik1_id},{p.korisnik2_id},'ceka se'";
-            p.kriterijumWhere = $"({p.korisnik1_id} NOT LIKE korisnik1_id AND {p.korisnik2_id} NOT LIKE korisnik2_id) AND " +
-                $"({p.korisnik2_id} NOT LIKE korisnik1_id AND {p.korisnik1_id} NOT LIKE korisnik2_id)";
+            p.kriterijumWhere = $"(korisnik1_id LIKE {p.korisnik1_id} AND korisnik2_id LIKE {p.korisnik2_id}) AND " +
+                $"(korisnik1_id LIKE {p.korisnik2_id} AND korisnik2_id LIKE {p.korisnik1_id})";
             if (broker.getCriteria(p) == null)
             {
 
