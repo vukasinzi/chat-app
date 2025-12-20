@@ -39,6 +39,7 @@ namespace Klijent
             tajmer = new DispatcherTimer(DispatcherPriority.Background);
             tajmer.Interval = TimeSpan.FromSeconds(1);
            tajmer.Tick += Tajmer_Tick;
+            korisnikText.Text += "korisnik: "+k.Korisnicko_ime;
         }
 
         private void Tajmer_Tick(object? sender, EventArgs e)

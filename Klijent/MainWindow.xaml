@@ -14,9 +14,8 @@
         AllowsTransparency="False"
         SnapsToDevicePixels="True"
         UseLayoutRounding="True"
-        MaxWidth="{x:Static SystemParameters.MaximizedPrimaryScreenWidth}"
-        MaxHeight="{x:Static SystemParameters.MaximizedPrimaryScreenHeight}"
-
+        MaxHeight="{Binding Source={x:Static SystemParameters.WorkArea}, Path=Height}"
+        MaxWidth="{Binding Source={x:Static SystemParameters.WorkArea}, Path=Width}"
         Loaded="Window_Loaded">
 
     <shell:WindowChrome.WindowChrome>
@@ -250,7 +249,8 @@
                                FontSize="14"
                                FontWeight="Bold"
                                VerticalAlignment="Center"/>
-                    <TextBlock Text="  |  Mono Dark"
+                    <TextBlock Name="korisnikText" 
+                        Text="  |  "
                                Foreground="{StaticResource TextMuted}"
                                FontSize="12"
                                VerticalAlignment="Center"/>
@@ -372,7 +372,7 @@
                                  Background="Transparent"
                                  BorderThickness="0"
                                  HorizontalContentAlignment="Stretch"
-                                 Foreground="{StaticResource TextOnDark}"
+                                    Foreground="{StaticResource TextOnDark}"
                                  Grid.ColumnSpan="2"
                                  Visibility="Collapsed"/>
                     </Grid>
