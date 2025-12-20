@@ -13,14 +13,15 @@ namespace SO
         public RegistrujSeSO(Korisnik k)
         {
             this.k = k;
-            k.vrednostiNaziv = $"'{k.Korisnicko_ime}','{k.Lozinka}'";
-            
+            this.k.kriterijumWhere = $"korisnicko_ime = '{k.Korisnicko_ime}' and lozinka = '{k.Lozinka}'"
+
+
         }
         protected override void ExecuteConcreteOperation()
         {
-            int a = broker.Insert(k);
-            if (a > 0)
-                Uspesno = true;
+            o.Rezultat = (Korisnik)broker.getCriteria(k);
+            if (o.Rezultat != null)
+                o.Uspesno = true;
         }
     }
 }

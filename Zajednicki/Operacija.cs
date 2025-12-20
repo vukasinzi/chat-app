@@ -16,6 +16,7 @@ namespace Zajednicki
         VratiZahtevePrijatelja,
         Pretraga2,
         PrihvatiPrijatelja,
-        OdbijPrijatelja
+        OdbijPrijatelja,
+        UcitajSvePoruke
     };
 }

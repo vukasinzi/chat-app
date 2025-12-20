@@ -308,5 +308,29 @@ namespace Klijent
                 return o;
             }
         }
+
+        internal async Task<Odgovor> UcitajSvePoruke(Korisnik primalac, Korisnik k)
+        {
+            try
+            {
+                Zahtev z = new Zahtev();
+                z.Operacija = Operacija.UcitajSvePoruke;
+                Tuple<int, int> tupl = new Tuple<int, int>(primalac.Id, k.Id);
+                z.Objekat = tupl;
+                await serializer.SendAsync(z);
+                Odgovor o = await serializer.ReceiveAsync<Odgovor>();
+                if (o.Rezultat is JsonElement je)
+                {
+                    List<Poruka> l = serializer.ReadType<List<Poruka>>(je);
+                    o.Rezultat = l;
+                }
+                return o;
+            }
+            catch (Exception x)
+            {
+                Odgovor o = new Odgovor();
+                return o;
+            }
+        }
     }
 }

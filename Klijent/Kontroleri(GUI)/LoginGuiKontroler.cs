@@ -61,14 +61,14 @@ namespace Klijent.Kontroleri_GUI_
             return false;
         }
 
-        internal async Task RegistrujSe(string korisnicko_ime, string lozinka)
+        internal async Task<bool> RegistrujSe(string korisnicko_ime, string lozinka)
         {
             try
             {
-                if(korisnicko_ime == "" || lozinka == "")
+                if (korisnicko_ime == "" || lozinka == "")
                 {
                     MessageBox.Show("Morate uneti korisnicko ime i lozinku.");
-                    return;
+                    return false;
                 }
                 Korisnik k = new Korisnik(korisnicko_ime, lozinka);
                 Komunikacija.Instance.Connect();
@@ -76,21 +76,27 @@ namespace Klijent.Kontroleri_GUI_
                 if (!dostupan.Uspesno)
                 {
                     MessageBox.Show("Korisnicko ime je zauzeto.");
-                    return;
-                } 
+                    return false;
+                }
                 Odgovor o = await Komunikacija.Instance.RegistrujSe(k);
                 if (o.Uspesno)
                 {
-                    MessageBox.Show("Uspesna registracija! Dobro dosli - " + k.Korisnicko_ime);
-                    MainWindow mw = new MainWindow(k);
+                    Korisnik l = (Korisnik)o.Rezultat;
+                    MainWindow window = new MainWindow(l);
+                    window.Show();
+                    return true;
                 }
                 else
+                {
                     MessageBox.Show("Registracija nije uspela.");
+                    return false;
+                }
             }
-            catch(Exception x)
+            catch (Exception x)
             {
                 Debug.WriteLine(x.Message);
             }
+                return false;
         }
     }
 }

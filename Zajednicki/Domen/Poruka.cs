@@ -1,4 +1,5 @@
-﻿using Microsoft.Data.SqlClient;
+﻿using Klijent.Domen;
+using Microsoft.Data.SqlClient;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -19,7 +20,10 @@ namespace Zajednicki.Domen
         public string kriterijumWhere { get; set; }
 
         public DateTime datum;
+        public Poruka()
+        {
 
+        }
         public Poruka(int primalac_id, int posiljalac_id, string poruka_text)
         {
             this.primalac_id = primalac_id;
@@ -29,7 +33,20 @@ namespace Zajednicki.Domen
 
         public List<IObjekat> vratiObjekte(SqlDataReader dr)
         {
-            throw new NotImplementedException();
+            List<IObjekat> popara = new List<IObjekat>();
+            while (dr.Read())
+            {
+                Poruka pop1 = new Poruka();
+                pop1.primalac_id = (int)dr["primalac"];
+                pop1.posiljalac_id = (int)dr["posiljalac"];
+                pop1.poruka_text = (string)dr["poruka_text"];
+                pop1.datum = (DateTime)dr["datum"];
+                popara.Add(pop1);
+            }
+            if (popara.Count == 0)
+                return null;
+            return popara;
+            
         }
 
         public List<IObjekat> vratiObjekteJoin(SqlDataReader dr)

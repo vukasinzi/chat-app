@@ -102,5 +102,12 @@ namespace Server
             oog.Execute();
             return ((OdbijPrijateljaSO)oog).Uspesno;
         }
+
+        internal async Task<List<Poruka>> UcitajSvePoruke(Tuple<int, int> tuple)
+        {
+            SystemOperationsBase uog = new UcitajSvePorukeSO(tuple);
+            uog.Execute();
+            return ((UcitajSvePorukeSO)uog).Lista;
+        }
     }
 }

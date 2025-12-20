@@ -33,7 +33,9 @@ namespace Klijent
 
         private async void Register_Click(object sender, RoutedEventArgs e)
         {
-            await LoginGuiKontroler.Instance.RegistrujSe(txt_korisnicko_ime.Text, txt_lozinka.Password);
+            bool successful = await LoginGuiKontroler.Instance.RegistrujSe(txt_korisnicko_ime.Text, txt_lozinka.Password);
+            if (successful)
+                Close();
         }
     }
 }

@@ -12,6 +12,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
+using System.Windows.Threading;
 using Zajednicki;
 using Zajednicki.Domen;
 
@@ -22,6 +23,7 @@ namespace Klijent
     {
         private Korisnik k;
         private readonly Dictionary<int, List<Poruka>> chats = new();
+        private readonly DispatcherTimer tajmer;
         public MainWindow()
         {
             InitializeComponent();
@@ -33,7 +35,16 @@ namespace Klijent
        
             Komunikacija.Instance.PorukaPrimljena += OnPorukaPrimljena;
             this.Closed += (_, __) => Komunikacija.Instance.PorukaPrimljena -= OnPorukaPrimljena;
-        
+
+            tajmer = new DispatcherTimer(DispatcherPriority.Background);
+            tajmer.Interval = TimeSpan.FromSeconds(1);
+           tajmer.Tick += Tajmer_Tick;
+        }
+
+        private void Tajmer_Tick(object? sender, EventArgs e)
+        {
+            ProveriNovePrijatelje();
+            UcitajPrijatelje();
         }
 
         private void OnPorukaPrimljena(Poruka p)
@@ -134,7 +145,7 @@ namespace Klijent
             if (!uspeh)
                 return;
             UcitajPrijatelje();
-            MessageBox.Show("Uspešno poslat zahtev za prijateljstvo korisniku - ", SearchTextBox.Text);
+            MessageBox.Show("Uspešno poslat zahtev za prijateljstvo korisniku " + SearchTextBox.Text);
             SearchTextBox.Clear();
 
         }
@@ -178,15 +189,24 @@ namespace Klijent
                 Kontakti.Items.Add(i);
             }
         }
-        private void Kontakti_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        private async void Kontakti_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             ListBoxItem i = (ListBoxItem)Kontakti.SelectedItem;
-
-            if (Kontakti.SelectedItem is ListBoxItem item && item.Tag is Korisnik k)
+            Korisnik primalac = new Korisnik();
+            if (Kontakti.SelectedItem is ListBoxItem item && item.Tag is Korisnik l)
             {
-                user.Text = k.Korisnicko_ime;   
+                user.Text = l.Korisnicko_ime;   
                 PorukePanel.Children.Clear();
+                primalac = l;
             }
+            List<Poruka> poruke = new List<Poruka>();
+            if(primalac != null)
+                 poruke = await MainGuiKontroler.Instance.ucitajSvePoruke(primalac,k);
+            foreach(Poruka x in poruke)
+            {
+                OnPorukaPrimljena(x);
+            }    
+
         }
         
 

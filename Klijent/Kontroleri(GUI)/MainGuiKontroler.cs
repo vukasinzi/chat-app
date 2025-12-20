@@ -172,5 +172,25 @@ namespace Klijent.Kontroleri_GUI_
                 return false;
             }
         }
+
+        internal async Task<List<Poruka>> ucitajSvePoruke(Korisnik primalac, Korisnik k)
+        {
+            try
+            {
+                Komunikacija.Instance.Connect();
+                Odgovor o = await Komunikacija.Instance.UcitajSvePoruke(primalac,k);
+                List<Poruka> poruke = new List<Poruka>();
+                if (o.Rezultat != null)
+                {
+                    poruke = (List<Poruka>)o.Rezultat;
+                }
+                return poruke;
+
+            }
+            catch
+            {
+                return null;
+            }
+        }
     }
 }
