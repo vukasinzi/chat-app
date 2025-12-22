@@ -112,8 +112,14 @@ namespace Server
         {
             lock (_lock)
             {
-                online.TryRemove(currentUser, out _);
-
+                try
+                { 
+                    online.TryRemove(currentUser, out _);
+                }
+                catch(Exception x)
+                {
+                    Debug.WriteLine(x.Message);
+                }
             }
         }
         internal void AddClient(ClientHandler clienthandler,string currentUser)

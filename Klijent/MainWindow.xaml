@@ -362,11 +362,23 @@
                         </Grid.ColumnDefinitions>
 
                         <ListBox x:Name="Kontakti"
-                                 Background="Transparent"
-                                 BorderThickness="0"
-                                 Foreground="{StaticResource TextOnDark}"
-                                 SelectionChanged="Kontakti_SelectionChanged"
-                                 Grid.ColumnSpan="2"/>
+                         Background="Transparent"
+                         BorderThickness="0"
+                         Foreground="{StaticResource TextOnDark}"
+                         SelectionChanged="Kontakti_SelectionChanged"
+                         ItemsSource="{Binding Kontakti}">  
+                         <ListBox.ItemTemplate>
+                                <DataTemplate>
+                                    <Grid>
+                                        <TextBlock Text="{Binding Korisnicko_ime}"
+                                         VerticalAlignment="Center"
+                                         FontSize="13"
+                                         TextTrimming="CharacterEllipsis"
+                                         Margin="8,0,8,0"/>   
+                                    </Grid>
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListBox>
 
                         <ListBox x:Name="Prijatelji"
                                  Background="Transparent"

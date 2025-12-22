@@ -1,11 +1,10 @@
 ﻿using Klijent.Domen;
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
 using System.Windows.Input;
 using Zajednicki;
 using Zajednicki.Domen;
@@ -25,8 +24,8 @@ namespace Klijent.Kontroleri_GUI_
                 return instance;
             }
         }
-        public ObservableCollection<Korisnik> Kontakti { get; set; } = new ObservableCollection<Korisnik>();
-
+        public List<Korisnik> kontakti = new List<Korisnik>();
+        public List<Prijateljstvo> prijatelji = new List<Prijateljstvo>();
         internal async Task<Korisnik> Pretrazi(string msgtext)
         {
             try
@@ -74,14 +73,11 @@ namespace Klijent.Kontroleri_GUI_
             {
                 Komunikacija.Instance.Connect();
                 Odgovor o = await Komunikacija.Instance.vratiSvePrijatelje(id);
-                Kontakti.Clear();
-
-                if (o != null && o.Rezultat != null)
+                if (o.Rezultat != null)
                 {
-                    var lista = (List<Korisnik>)o.Rezultat;
-                    foreach (var u in lista)
-                        Kontakti.Add(u);
+                    kontakti = (List<Korisnik>)o.Rezultat;
                 }
+
             }
             catch(Exception x)
             {
@@ -123,21 +119,25 @@ namespace Klijent.Kontroleri_GUI_
             }
         }
 
-        internal async Task<Odgovor> ProveriNovePrijatelje(int id)
+        internal async Task ProveriNovePrijatelje(int id)
         {
             try
             {
                 Komunikacija.Instance.Connect();
                 Odgovor o = await Komunikacija.Instance.ProveriNovePrijatelje(id);
                 if (o != null)
-                    return o;
-                else
-                    throw new Exception("umri");
-
+                    if (o.Rezultat != null)
+                    {
+                        prijatelji = (List<Prijateljstvo>)o.Rezultat;
+                    }
+                    else
+                         return;
+                     
+                     
             }
             catch
             {
-                return null;
+                return ;
             }
         }
 
@@ -183,17 +183,35 @@ namespace Klijent.Kontroleri_GUI_
             {
                 Komunikacija.Instance.Connect();
                 Odgovor o = await Komunikacija.Instance.UcitajSvePoruke(primalac,k);
-               
+                List<Poruka> poruke = new List<Poruka>();
                 if (o.Rezultat != null)
                 {
-                    return (List<Poruka>)o.Rezultat;
+                    poruke = (List<Poruka>)o.Rezultat;
                 }
-                return new List<Poruka>();
+                return poruke;
 
             }
             catch
             {
                 return null;
+            }
+        }
+
+        internal async Task<bool> ObrisiPrijatelja(Prijateljstvo p)
+        {
+            try
+            {
+                Komunikacija.Instance.Connect();
+                Odgovor o = await Komunikacija.Instance.ObrisiPrijatelja(p);
+                if (o.Uspesno)
+                    return true;
+                else
+                    throw new Exception("umri");
+
+            }
+            catch
+            {
+                return false;
             }
         }
     }

@@ -176,8 +176,9 @@ namespace Klijent
                 }
                 else
                 {
-                    if(o.Rezultat!= null)
+                    if(o.Rezultat != null)
                         o.Rezultat = serializer.ReadType<string>((JsonElement)o.Rezultat);
+
                     return o;
                 }
             }
@@ -266,8 +267,9 @@ namespace Klijent
                 {
                     List<Prijateljstvo> l = serializer.ReadType<List<Prijateljstvo>>(je);
                     o.Rezultat = l;
+                    return o;
                 }
-                return o;
+                return null;
             }
             catch (Exception x)
             {
@@ -329,6 +331,24 @@ namespace Klijent
                     List<Poruka> l = serializer.ReadType<List<Poruka>>(je);
                     o.Rezultat = l;
                 }
+                return o;
+            }
+            catch (Exception x)
+            {
+                Odgovor o = new Odgovor();
+                return o;
+            }
+        }
+
+        internal async Task<Odgovor> ObrisiPrijatelja(Prijateljstvo p)
+        {
+            try
+            {
+                Zahtev z = new Zahtev();
+                z.Operacija = Operacija.ObrisiPrijatelja;
+                z.Objekat = p;
+                await serializer.SendAsync(z);
+                Odgovor o = await serializer.ReceiveAsync<Odgovor>();
                 return o;
             }
             catch (Exception x)

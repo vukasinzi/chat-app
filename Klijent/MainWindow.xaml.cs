@@ -22,8 +22,7 @@ namespace Klijent
     public partial class MainWindow : Window
     {
         private Korisnik k;
-        private readonly Dictionary<int, List<Poruka>> chats = new();
-        private readonly DispatcherTimer tajmer;
+        Korisnik primalac;
         public MainWindow()
         {
             InitializeComponent();
@@ -32,43 +31,28 @@ namespace Klijent
         {
             InitializeComponent();
             this.k = k;
-       
+            DataContext = MainGuiKontroler.Instance;
             Komunikacija.Instance.PorukaPrimljena += OnPorukaPrimljena;
             this.Closed += (_, __) => Komunikacija.Instance.PorukaPrimljena -= OnPorukaPrimljena;
 
-            tajmer = new DispatcherTimer(DispatcherPriority.Background);
-            tajmer.Interval = TimeSpan.FromSeconds(1);
-           tajmer.Tick += Tajmer_Tick;
+        
             korisnikText.Text += "korisnik: "+k.Korisnicko_ime;
+
         }
 
-        private void Tajmer_Tick(object? sender, EventArgs e)
-        {
-            ProveriNovePrijatelje();
-            UcitajPrijatelje();
-        }
-
+        //??PORUKE??/??SEND??//
         private void OnPorukaPrimljena(Poruka p)
         {
             Dispatcher.BeginInvoke(new Action(() =>
             {
-                int otherId;
+                int drugi;
                 if (p.posiljalac_id == k.Id)
-                    otherId = p.primalac_id;
+                    drugi = p.primalac_id;
                 else
-                    otherId = p.posiljalac_id;
+                    drugi = p.posiljalac_id;
 
-                if (!chats.ContainsKey(otherId))
-                    chats[otherId] = new List<Poruka>();
-
-                chats[otherId].Add(p);
-
-                if (Kontakti.SelectedItem is ListBoxItem item &&
-                    item.Tag is Korisnik other &&
-                    other.Id == otherId)
-                {
+                if (Kontakti.SelectedItem is Korisnik izabrani && izabrani.Id == drugi)
                     DodajPoruka(p);
-                }
             }));
         }
 
@@ -99,40 +83,18 @@ namespace Klijent
 
             PorukePanel.Children.Add(bubble);
         }
-
-
-        private void CloseButton_Click(object sender, RoutedEventArgs e)
-        {
-            Close();
-        }
-
-        private void MaximizeButton_Click(object sender, RoutedEventArgs e)
-        {
-            if (WindowState == WindowState.Maximized)
-                WindowState = WindowState.Normal;
-            else
-                WindowState = WindowState.Maximized;
-        }
-
-        private void MinimizeButton_Click(object sender, RoutedEventArgs e)
-        {
-            if (WindowState == WindowState.Minimized)
-                WindowState = WindowState.Normal;
-            else
-                WindowState = WindowState.Minimized;
-
-        }
-
         private async void Send_Click(object sender, RoutedEventArgs e)
         {
             string poruka_text = messageText.Text;
-            ListBoxItem item = (ListBoxItem)Kontakti.SelectedItem;
-            Korisnik primalac = (Korisnik)item.Tag;
-            await MainGuiKontroler.Instance.Posalji(poruka_text, k.Id,primalac.Id);
+            await MainGuiKontroler.Instance.Posalji(poruka_text, k.Id, primalac.Id);
             Poruka p = new Poruka(primalac.Id, k.Id, poruka_text);
             DodajPoruka(p);
             messageText.Clear();
         }
+        //krajkrajkraj//
+   
+       
+      
 
         private async void SearchButton_Click(object sender, RoutedEventArgs e)
         {
@@ -160,61 +122,29 @@ namespace Klijent
             {
                 MessageBox.Show(x.Message);
             }
-
-            Kontakti.Items.Clear();
-            foreach (Korisnik k in MainGuiKontroler.Instance.prijatelji)
-            {
-                var grid = new Grid();
-                grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
-                grid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
-                grid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
-
-                var txt = new TextBlock
-                {
-                    Text =k.Korisnicko_ime,
-                    VerticalAlignment = VerticalAlignment.Center,
-                    FontSize = 13,
-                    TextTrimming = TextTrimming.CharacterEllipsis,
-                    Margin = new Thickness(8, 0, 8, 0)
-                };
-                Grid.SetColumn(txt, 0);
-                ListBoxItem i = new ListBoxItem
-                {
-                    Content = grid,
-                    Tag = k,
-                    Padding = new Thickness(6),
-                    Margin = new Thickness(2),
-                    MinHeight = 40
-                };
-                grid.Children.Add(txt);
-                Kontakti.Items.Add(i);
-            }
         }
+
+
         private async void Kontakti_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            ListBoxItem i = (ListBoxItem)Kontakti.SelectedItem;
-            Korisnik primalac = new Korisnik();
-            if (Kontakti.SelectedItem is ListBoxItem item && item.Tag is Korisnik l)
-            {
-                user.Text = l.Korisnicko_ime;   
-                PorukePanel.Children.Clear();
-                primalac = l;
-            }
-            List<Poruka> poruke = new List<Poruka>();
-            if(primalac != null)
-                 poruke = await MainGuiKontroler.Instance.ucitajSvePoruke(primalac,k);
-            foreach(Poruka x in poruke)
-            {
+            if (Kontakti.SelectedItem is not Korisnik l)
+                return;
+
+            user.Text = l.Korisnicko_ime;
+            PorukePanel.Children.Clear();
+            primalac = l;
+
+            var poruke = await MainGuiKontroler.Instance.ucitajSvePoruke(primalac, k);
+            if (poruke == null)
+                return;
+
+            foreach (var x in poruke)
                 OnPorukaPrimljena(x);
-            }    
-
         }
-        
 
-        private async void Window_Loaded(object sender, RoutedEventArgs e)
-        {
-            UcitajPrijatelje();
-        }
+
+
+    
 
         private async void Razgovori_Click(object sender, RoutedEventArgs e)
         {
@@ -303,7 +233,7 @@ namespace Klijent
             Odgovor o = await MainGuiKontroler.Instance.ProveriNovePrijatelje(k.Id);
             List<Prijateljstvo> naCekanju = (List<Prijateljstvo>)o.Rezultat;
             Prijatelji.Items.Clear();
-            if (naCekanju.Count == 0)
+            if (naCekanju != null || naCekanju.Count == 0)
                 return;
             foreach(Prijateljstvo p in naCekanju)
             {
@@ -318,11 +248,36 @@ namespace Klijent
             ProveriNovePrijatelje();
 
         }
+        //WINDOW FORM MENADZMENT
         private void TitleBar_MouseLeftButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
         {
             DragMove();
         }
 
+        private void CloseButton_Click(object sender, RoutedEventArgs e)
+        {
+            Close();
+        }
 
+        private void MaximizeButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (WindowState == WindowState.Maximized)
+                WindowState = WindowState.Normal;
+            else
+                WindowState = WindowState.Maximized;
+        }
+
+        private void MinimizeButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (WindowState == WindowState.Minimized)
+                WindowState = WindowState.Normal;
+            else
+                WindowState = WindowState.Minimized;
+
+        }
+        private async void Window_Loaded(object sender, RoutedEventArgs e)
+        {
+            UcitajPrijatelje();
+        }
     }
 }
