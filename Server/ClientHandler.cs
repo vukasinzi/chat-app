@@ -131,6 +131,9 @@ namespace Server
                     case Operacija.UcitajSvePoruke:
                         o.Rezultat = await Kontroler.Instance.UcitajSvePoruke(serializer.ReadType<Tuple<int, int>>((JsonElement)z.Objekat));
                         break;
+                    case Operacija.ObrisiPrijateljstvo:
+                        o.Uspesno = await Kontroler.Instance.ObrisiPrijateljstvo(serializer.ReadType<Prijateljstvo>((JsonElement)z.Objekat));
+                            break;
                 }
                 if (o.Poruka == "logovan")
                     throw new Exception("login exception");

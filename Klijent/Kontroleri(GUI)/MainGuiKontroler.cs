@@ -26,6 +26,7 @@ namespace Klijent.Kontroleri_GUI_
             }
         }
         public ObservableCollection<Korisnik> Kontakti { get; set; } = new ObservableCollection<Korisnik>();
+        public ObservableCollection<PrijateljstvoView> Prijateljstva { get; set; } = new ObservableCollection<PrijateljstvoView>();
 
         internal async Task<Korisnik> Pretrazi(string msgtext)
         {
@@ -123,21 +124,36 @@ namespace Klijent.Kontroleri_GUI_
             }
         }
 
-        internal async Task<Odgovor> ProveriNovePrijatelje(int id)
+        internal async Task VratiZahtevePrijatelja(int id)
         {
             try
             {
                 Komunikacija.Instance.Connect();
-                Odgovor o = await Komunikacija.Instance.ProveriNovePrijatelje(id);
-                if (o != null)
-                    return o;
-                else
-                    throw new Exception("umri");
+                Odgovor o = await Komunikacija.Instance.VratiZahtevePrijatelja(id);
+                Prijateljstva.Clear();
+                if (o == null || o.Rezultat == null)
+                    return;
+
+                var lista = (List<Prijateljstvo>)o.Rezultat;
+                foreach (var x in lista)
+                {
+                    Odgovor l;
+                    if (id == x.korisnik1_id)
+                        l = await Komunikacija.Instance.Pretrazi(x.korisnik2_id);
+                    else
+                        l = await Komunikacija.Instance.Pretrazi(x.korisnik1_id);
+                    if (l != null && l.Rezultat != null && l.Rezultat is string)
+                    {
+                        PrijateljstvoView p = new PrijateljstvoView((string)l.Rezultat, x);
+                        Prijateljstva.Add(p);
+                    }
+                }
+
 
             }
             catch
             {
-                return null;
+                return;
             }
         }
 
@@ -194,6 +210,22 @@ namespace Klijent.Kontroleri_GUI_
             catch
             {
                 return null;
+            }
+        }
+
+        internal async Task<bool> ObrisiPrijateljstvo(int id1, int id2)
+        {
+            try
+            {
+                Komunikacija.Instance.Connect();
+                Odgovor o = await Komunikacija.Instance.ObrisiPrijateljstvo(id1, id2);
+
+                return o.Uspesno;
+
+            }
+            catch
+            {
+                return false;
             }
         }
     }

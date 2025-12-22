@@ -252,7 +252,7 @@ namespace Klijent
             }
         }
 
-        internal async Task<Odgovor> ProveriNovePrijatelje(int id)
+        internal async Task<Odgovor> VratiZahtevePrijatelja(int id)
         {
             try
             {
@@ -329,6 +329,27 @@ namespace Klijent
                     List<Poruka> l = serializer.ReadType<List<Poruka>>(je);
                     o.Rezultat = l;
                 }
+                return o;
+            }
+            catch (Exception x)
+            {
+                Odgovor o = new Odgovor();
+                return o;
+            }
+        }
+
+        internal async Task<Odgovor> ObrisiPrijateljstvo(int id1, int id2)
+        {
+            try
+            {
+                Zahtev z = new Zahtev();
+                z.Operacija = Operacija.ObrisiPrijateljstvo;
+                Prijateljstvo p = new Prijateljstvo();
+                p.korisnik1_id = id1;
+                p.korisnik2_id = id2;
+                z.Objekat = p;
+                await serializer.SendAsync(z);
+                Odgovor o = await serializer.ReceiveAsync<Odgovor>();
                 return o;
             }
             catch (Exception x)

@@ -360,33 +360,107 @@
                             <ColumnDefinition Width="8*"/>
                             <ColumnDefinition Width="19*"/>
                         </Grid.ColumnDefinitions>
-
                         <ListBox x:Name="Kontakti"
+                         Grid.ColumnSpan="2"
+                         ItemsSource="{Binding Kontakti}"
                          Background="Transparent"
                          BorderThickness="0"
                          Foreground="{StaticResource TextOnDark}"
-                         SelectionChanged="Kontakti_SelectionChanged"
-                         ItemsSource="{Binding Kontakti}">  
-                         <ListBox.ItemTemplate>
+                         HorizontalContentAlignment="Stretch"
+                         ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                                 
+                         SelectionChanged="Kontakti_SelectionChanged">
+
+
+                            <ListBox.ItemContainerStyle>
+                                <Style TargetType="ListBoxItem" BasedOn="{StaticResource {x:Type ListBoxItem}}">
+                                    <Setter Property="Height" Value="52"/>
+                                    <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                                </Style>
+                            </ListBox.ItemContainerStyle>
+
+                            <ListBox.ItemTemplate>
                                 <DataTemplate>
-                                    <Grid>
+                                    <Grid Background="Transparent">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+
                                         <TextBlock Text="{Binding Korisnicko_ime}"
-                                         VerticalAlignment="Center"
-                                         FontSize="13"
-                                         TextTrimming="CharacterEllipsis"
-                                         Margin="8,0,8,0"/>   
+                                           Foreground="{StaticResource TextOnDark}"
+                                           VerticalAlignment="Center"
+                                           FontSize="13"
+                                           TextTrimming="CharacterEllipsis"
+                                           Margin="8,0,8,0"/>
+
+
+                                        <Button Grid.Column="1"
+                        Style="{StaticResource CircleActionButton}"
+                        Content="×"
+                        Foreground="Red"
+                        Margin="6,0,6,0"
+                        Tag="{Binding}"
+                        Click="Delete_Click"/>
                                     </Grid>
                                 </DataTemplate>
                             </ListBox.ItemTemplate>
                         </ListBox>
 
+
                         <ListBox x:Name="Prijatelji"
-                                 Background="Transparent"
-                                 BorderThickness="0"
-                                 HorizontalContentAlignment="Stretch"
-                                    Foreground="{StaticResource TextOnDark}"
-                                 Grid.ColumnSpan="2"
-                                 Visibility="Collapsed"/>
+                         Grid.ColumnSpan="2"
+                         ItemsSource="{Binding Prijateljstva}"
+                         Background="Transparent"
+                         BorderThickness="0"
+                         Foreground="{StaticResource TextOnDark}"
+                         HorizontalContentAlignment="Stretch"
+                         ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                         Visibility="Collapsed">
+
+                            <ListBox.ItemContainerStyle>
+                                <Style TargetType="ListBoxItem" BasedOn="{StaticResource {x:Type ListBoxItem}}">
+                                    <Setter Property="Height" Value="52"/>
+                                    <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                                </Style>
+                            </ListBox.ItemContainerStyle>
+
+                            <ListBox.ItemTemplate>
+                                <DataTemplate>
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+
+                                        <TextBlock Text="{Binding Korisnicko_ime}"
+                                           Foreground="{StaticResource TextOnDark}"
+                                           VerticalAlignment="Center"
+                                           FontSize="13"
+                                           TextTrimming="CharacterEllipsis"
+                                           Margin="8,0,8,0"/>
+
+                                        <Button Grid.Column="1"
+                                        Style="{StaticResource CircleActionButton}"
+                                        Content="✓"
+                                        Foreground="Green"
+                                        Tag="{Binding}"
+                                        Click="Accept_Click"/>
+
+                                        <Button Grid.Column="2"
+                                        Style="{StaticResource CircleActionButton}"
+                                        Content="×"
+                                        Foreground="Red"
+                                        Tag="{Binding}"
+                                        Click="Decline_Click"/>
+
+                                    </Grid>
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListBox>
+
+
                     </Grid>
                 </Grid>
             </Border>
@@ -419,7 +493,7 @@
 
                     <ScrollViewer Grid.Row="1"
                                   Background="{StaticResource ChatBackground}"
-                                  VerticalScrollBarVisibility="Auto">
+                                  VerticalScrollBarVisibility="Disabled">
                         <StackPanel x:Name="PorukePanel" Margin="12,8,12,8"/>
                     </ScrollViewer>
 

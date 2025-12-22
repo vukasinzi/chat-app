@@ -109,5 +109,12 @@ namespace Server
             uog.Execute();
             return ((UcitajSvePorukeSO)uog).Lista;
         }
+
+        internal async Task<bool> ObrisiPrijateljstvo(Prijateljstvo prijateljstvo)
+        {
+            SystemOperationsBase oog = new ObrisiPrijateljstvoSO(prijateljstvo);
+            oog.Execute();
+            return ((ObrisiPrijateljstvoSO)oog).Uspesno;
+        }
     }
 }

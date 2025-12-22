@@ -107,16 +107,27 @@ namespace Klijent
            bool uspeh =  await MainGuiKontroler.Instance.DodajPrijatelja(k.Id,coveculjak.Id);
             if (!uspeh)
                 return;
-            UcitajPrijatelje();
+            
             MessageBox.Show("Uspešno poslat zahtev za prijateljstvo korisniku " + SearchTextBox.Text);
             SearchTextBox.Clear();
 
         }
-        private async void UcitajPrijatelje()
+        private async Task UcitajPrijatelje()
         {
             try
             {
                 await MainGuiKontroler.Instance.vratiSvePrijatelje(k);
+            }
+            catch (Exception x)
+            {
+                MessageBox.Show(x.Message);
+            }
+        }
+        private async Task UcitajZahtevePrijateljstva()
+        {
+            try
+            {
+                await MainGuiKontroler.Instance.VratiZahtevePrijatelja(k.Id);
             }
             catch (Exception x)
             {
@@ -143,109 +154,68 @@ namespace Klijent
         }
 
 
+        //dinamicki buttoni
+        private async void Delete_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is not Button b || b.Tag is not Korisnik u)
+                return;
 
-    
+            bool ok = await MainGuiKontroler.Instance.ObrisiPrijateljstvo(k.Id, u.Id);
+            if (!ok)
+                return;
 
+            MainGuiKontroler.Instance.Kontakti.Remove(u);
+
+            if (primalac != null && primalac.Id == u.Id)
+            {
+                primalac = null;
+                user.Text = "";
+                PorukePanel.Children.Clear();
+            }
+        }
+  
+        
+
+        //BUTTONI
         private async void Razgovori_Click(object sender, RoutedEventArgs e)
         {
             Kontakti.Visibility = Visibility.Visible;
             Prijatelji.Visibility = Visibility.Collapsed;
-            UcitajPrijatelje();
+           
         }
-        private ListBoxItem DinamickiItem(string v, Prijateljstvo p)
-        {
-            var grid = new Grid();
-            grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
-            grid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
-            grid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
 
-            var txt = new TextBlock
-            {
-                Text = v,
-                VerticalAlignment = VerticalAlignment.Center,
-                FontSize = 13,
-                TextTrimming = TextTrimming.CharacterEllipsis,
-                Margin = new Thickness(8, 0, 8, 0)
-            };
-            Grid.SetColumn(txt, 0);
-
-            var btnAccept = new Button
-            {
-                Content = "✓",
-                ToolTip = "Prihvati",
-                Tag = p,
-                Style = (Style)FindResource("CircleActionButton"),
-                Margin = new Thickness(3, 0, 0, 0),
-                Foreground = Brushes.Green
-            };
-            btnAccept.Click += Accept_Click;
-            Grid.SetColumn(btnAccept, 1);
-
-            var btnDecline = new Button
-            {
-                Content = "×",
-                ToolTip = "Odbij",
-                Tag = p,
-                Style = (Style)FindResource("CircleActionButton"),
-                Margin = new Thickness(3, 0, 0, 0),
-                Foreground = Brushes.Red
-
-
-            };
-           btnDecline.Click += Decline_Click;
-            Grid.SetColumn(btnDecline, 2);
-
-            grid.Children.Add(txt);
-            grid.Children.Add(btnAccept);
-            grid.Children.Add(btnDecline);
-
-            return new ListBoxItem
-            {
-                Content = grid,
-                Tag = p,
-                Padding = new Thickness(6),
-                Margin = new Thickness(2),
-                MinHeight = 40
-            };
-        }
 
         private async void Decline_Click(object sender, RoutedEventArgs e)
         {
-            var btn = (Button)sender;
-            var prijatelj = (Prijateljstvo)btn.Tag;
-            bool uspesno = await MainGuiKontroler.Instance.OdbijPrijatelja(prijatelj);
-            if (uspesno)
-                ProveriNovePrijatelje();
+            if (sender is not Button b || b.Tag is not PrijateljstvoView p)
+                return;
+
+            bool Uspesno = await MainGuiKontroler.Instance.OdbijPrijatelja(p.Link);
+            if (Uspesno)
+                MainGuiKontroler.Instance.Prijateljstva.Remove(p);
+
+
         }
 
         private async void Accept_Click(object sender, RoutedEventArgs e)
         {
-            var btn = (Button)sender;
-            var prijatelj = (Prijateljstvo)btn.Tag;
-            bool uspesno = await MainGuiKontroler.Instance.PrihvatiPrijatelja(prijatelj);
-            if (uspesno)
-                ProveriNovePrijatelje();
-
-        }
-
-        async void ProveriNovePrijatelje()
-        {
-            Odgovor o = await MainGuiKontroler.Instance.ProveriNovePrijatelje(k.Id);
-            List<Prijateljstvo> naCekanju = (List<Prijateljstvo>)o.Rezultat;
-            Prijatelji.Items.Clear();
-            if (naCekanju != null || naCekanju.Count == 0)
+            if (sender is not Button b || b.Tag is not PrijateljstvoView p)
                 return;
-            foreach(Prijateljstvo p in naCekanju)
+
+            bool Uspesno = await MainGuiKontroler.Instance.PrihvatiPrijatelja(p.Link);
+            if (Uspesno)
             {
-                string v = await MainGuiKontroler.Instance.Pretrazi(p.korisnik1_id);
-                Prijatelji.Items.Add(DinamickiItem(v, p));
+                
+                MainGuiKontroler.Instance.Prijateljstva.Remove(p);
             }
         }
+
+    
         private async void PrijateljiBtn_Click(object sender, RoutedEventArgs e)
         {
             Kontakti.Visibility = Visibility.Collapsed;
             Prijatelji.Visibility = Visibility.Visible;
-            ProveriNovePrijatelje();
+           
 
         }
         //WINDOW FORM MENADZMENT
@@ -277,7 +247,8 @@ namespace Klijent
         }
         private async void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            UcitajPrijatelje();
+           await UcitajPrijatelje();
+            await UcitajZahtevePrijateljstva();
         }
     }
 }
