@@ -120,6 +120,11 @@ namespace Klijent
             bubble.Child = tb;
 
             PorukePanel.Children.Add(bubble);
+
+            Dispatcher.BeginInvoke(new Action(() =>
+            {
+                ChatScroll.ScrollToEnd();
+            }), DispatcherPriority.Background);
         }
         private async void Send_Click(object sender, RoutedEventArgs e)
         {
@@ -222,6 +227,14 @@ namespace Klijent
             Kontakti.Visibility = Visibility.Visible;
             Prijatelji.Visibility = Visibility.Collapsed;
            
+        }
+        private void MessageText_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Enter)
+            {
+                e.Handled = true;
+                Send_Click(Send, null);
+            }
         }
 
 
