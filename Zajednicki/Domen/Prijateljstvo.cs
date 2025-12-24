@@ -78,5 +78,20 @@ namespace Zajednicki.Domen
         {
             throw new NotImplementedException();
         }
+        public override bool Equals(object obj)
+        {
+            if (ReferenceEquals(this, obj)) return true;
+            if (obj is not Prijateljstvo other) return false;
+
+            return (korisnik1_id == other.korisnik1_id && korisnik2_id == other.korisnik2_id)
+                || (korisnik1_id == other.korisnik2_id && korisnik2_id == other.korisnik1_id);
+        }
+
+        public override int GetHashCode()
+        {
+            int a = Math.Min(korisnik1_id, korisnik2_id);
+            int b = Math.Max(korisnik1_id, korisnik2_id);
+            return HashCode.Combine(a, b);
+        }
     }
 }

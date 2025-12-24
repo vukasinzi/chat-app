@@ -31,6 +31,10 @@ namespace Klijent
         private JsonNetworkSerializer pushSerializer;
         private CancellationTokenSource pushCts;
         public event Action<Poruka> PorukaPrimljena;
+        public event Action<PrijateljstvoView> PrijateljaDodaj;
+        public event Action<Korisnik> PrijateljaPrihvati;
+        public event Action<Korisnik> PrijateljaObrisi;
+        public event Action<PrijateljstvoView> PrijateljaOdbij;
 
         bool isConnected()
         {
@@ -97,8 +101,27 @@ namespace Klijent
         {
             while(!token.IsCancellationRequested && pushSocket != null&&  pushSocket.Connected)
             {
-                Poruka p = await pushSerializer.ReceiveAsync<Poruka>(token);
-                PorukaPrimljena.Invoke(p);
+                Zahtev z = await pushSerializer.ReceiveAsync<Zahtev>(token);
+                switch (z.Operacija)
+                {
+                    case Operacija.Posalji:
+                        PorukaPrimljena.Invoke(serializer.ReadType<Poruka>((JsonElement)z.Objekat));
+                        break;
+                    case Operacija.DodajPrijatelja:
+                        PrijateljaDodaj.Invoke(serializer.ReadType<PrijateljstvoView>((JsonElement)z.Objekat));
+                        break;
+                    case Operacija.PrihvatiPrijatelja:
+                        PrijateljaPrihvati.Invoke(serializer.ReadType<Korisnik>((JsonElement)z.Objekat));
+                        break;
+                    case Operacija.ObrisiPrijateljstvo:
+                        PrijateljaObrisi.Invoke(serializer.ReadType<Korisnik>((JsonElement)z.Objekat));
+                        break;
+                    case Operacija.OdbijPrijatelja:
+                        PrijateljaOdbij.Invoke(serializer.ReadType<PrijateljstvoView>((JsonElement)z.Objekat));
+                        break;
+
+                }
+
             }
         }
 

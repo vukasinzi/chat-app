@@ -58,12 +58,12 @@ namespace Server
             }
         }
 
-        public Task PushAsync(Poruka p, CancellationToken token = default)
+        public Task PushAsync(Zahtev z, CancellationToken token = default)
         {
             if (pushSocket == null || !pushSocket.Connected || pushSerializer == null)
                 return Task.CompletedTask;
 
-            return pushSerializer.SendAsync(p, token);
+            return pushSerializer.SendAsync(z, token);
         }
 
         private async Task<Odgovor> ProcessRequests(Zahtev z)
@@ -108,32 +108,115 @@ namespace Server
                         {
                             Poruka p = serializer.ReadType<Poruka>((JsonElement)z.Objekat);
                             o.Uspesno = await Kontroler.Instance.Posalji(p);
-                            if(o.Uspesno)
+                            if (o.Uspesno)
                             {
                                 string primalacUsername = await Kontroler.Instance.Pretrazi(p.primalac_id);
                                 if (server.online.TryGetValue(primalacUsername, out var client))
-                                    await client.PushAsync(serializer.ReadType<Poruka>((JsonElement)z.Objekat));
+                                {
+                                    await client.PushAsync(z);
+                                }
                             }
                         }
                         break;
                     case Operacija.DodajPrijatelja:
-                        o.Uspesno = await Kontroler.Instance.DodajPrijatelja(serializer.ReadType<Prijateljstvo>((JsonElement)z.Objekat));
+                        {
+                            Prijateljstvo x = serializer.ReadType<Prijateljstvo>((JsonElement)z.Objekat);
+                            o.Uspesno = await Kontroler.Instance.DodajPrijatelja(x);
+                            if (o.Uspesno)
+                            {
+                                string primalacUsername = await Kontroler.Instance.Pretrazi(x.korisnik2_id);
+                                PrijateljstvoView zaSlanje = new PrijateljstvoView(primalacUsername, x);
+                                if (server.online.TryGetValue(primalacUsername, out var client))
+                                {
+                                    Zahtev _z = new Zahtev();
+                                    _z.Operacija = Operacija.DodajPrijatelja;
+                                    _z.Objekat = zaSlanje;
+                                    await client.PushAsync(_z);
+                                }
+                            }
+                        }
                         break;
                     case Operacija.VratiZahtevePrijatelja:
                         o.Rezultat = await Kontroler.Instance.VratiZahtevePrijatelja(serializer.ReadTypeStruct<int>((JsonElement)z.Objekat));
                         break;
                     case Operacija.PrihvatiPrijatelja:
-                        o.Uspesno = await Kontroler.Instance.PrihvatiPrijatelja(serializer.ReadType<Prijateljstvo>((JsonElement)z.Objekat));
+                        {
+                            o.Uspesno = await Kontroler.Instance.PrihvatiPrijatelja(serializer.ReadType<Prijateljstvo>((JsonElement)z.Objekat));
+                            if (o.Uspesno)
+                            {
+                                Prijateljstvo _p = serializer.ReadType<Prijateljstvo>((JsonElement)z.Objekat);
+
+                                string posiljalacUsername = await Kontroler.Instance.Pretrazi(_p.korisnik1_id);
+                                string primalacUsername = await Kontroler.Instance.Pretrazi(_p.korisnik2_id);
+                                Odgovor _o = await Kontroler.Instance.Pretrazi(primalacUsername);
+                                Korisnik _k = (Korisnik)_o.Rezultat;
+                                if (server.online.TryGetValue(posiljalacUsername, out var client))
+                                {
+                                    Zahtev _z = new Zahtev();
+                                    _z.Operacija = Operacija.PrihvatiPrijatelja;
+                                    _z.Objekat = _k;
+                                    await client.PushAsync(_z);
+                                }
+                                _o = await Kontroler.Instance.Pretrazi(posiljalacUsername);
+                                _k = (Korisnik)_o.Rezultat;
+                                if (server.online.TryGetValue(primalacUsername, out var client1))
+                                {
+                                    Zahtev _z = new Zahtev();
+                                    _z.Operacija = Operacija.PrihvatiPrijatelja;
+                                    _z.Objekat = _k;
+                                    await client1.PushAsync(_z);
+                                }
+                            }
+                        }
                         break;
                     case Operacija.OdbijPrijatelja:
-                        o.Uspesno = await Kontroler.Instance.OdbijPrijatelja(serializer.ReadType<Prijateljstvo>((JsonElement)z.Objekat));
+                        {
+                            Prijateljstvo x = serializer.ReadType<Prijateljstvo>((JsonElement)z.Objekat);
+                            o.Uspesno = await Kontroler.Instance.OdbijPrijatelja(x);
+                            if (o.Uspesno)
+                            {
+                                string primalacUsername = await Kontroler.Instance.Pretrazi(x.korisnik2_id);
+                                PrijateljstvoView zaSlanje = new PrijateljstvoView(primalacUsername, x);
+                                if (server.online.TryGetValue(primalacUsername, out var client))
+                                {
+                                    Zahtev _z = new Zahtev();
+                                    _z.Operacija = Operacija.OdbijPrijatelja;
+                                    _z.Objekat = zaSlanje;
+                                    await client.PushAsync(_z);
+                                }
+                            }
+                        }
                         break;
                     case Operacija.UcitajSvePoruke:
                         o.Rezultat = await Kontroler.Instance.UcitajSvePoruke(serializer.ReadType<Tuple<int, int>>((JsonElement)z.Objekat));
                         break;
                     case Operacija.ObrisiPrijateljstvo:
-                        o.Uspesno = await Kontroler.Instance.ObrisiPrijateljstvo(serializer.ReadType<Prijateljstvo>((JsonElement)z.Objekat));
-                            break;
+                        {
+                            o.Uspesno = await Kontroler.Instance.ObrisiPrijateljstvo(serializer.ReadType<Prijateljstvo>((JsonElement)z.Objekat));
+                            Prijateljstvo _p = serializer.ReadType<Prijateljstvo>((JsonElement)z.Objekat);
+
+                            string posiljalacUsername = await Kontroler.Instance.Pretrazi(_p.korisnik1_id);
+                            string primalacUsername = await Kontroler.Instance.Pretrazi(_p.korisnik2_id);
+                            Odgovor _o = await Kontroler.Instance.Pretrazi(primalacUsername);
+                            Korisnik _k = (Korisnik)_o.Rezultat;
+                            if (server.online.TryGetValue(posiljalacUsername, out var client))
+                            {
+                                Zahtev _z = new Zahtev();
+                                _z.Operacija = Operacija.ObrisiPrijateljstvo;
+                                _z.Objekat = _k;
+                                await client.PushAsync(_z);
+                            }
+                            _o = await Kontroler.Instance.Pretrazi(posiljalacUsername);
+                            _k = (Korisnik)_o.Rezultat;
+                            if (server.online.TryGetValue(primalacUsername, out var client1))
+                            {
+                                Zahtev _z = new Zahtev();
+                                _z.Operacija = Operacija.ObrisiPrijateljstvo;
+                                _z.Objekat = _k;
+                                await client1.PushAsync(_z);
+                            }
+                        }
+                        break;
                 }
                 if (o.Poruka == "logovan")
                     throw new Exception("login exception");

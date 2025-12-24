@@ -367,7 +367,7 @@
                          BorderThickness="0"
                          Foreground="{StaticResource TextOnDark}"
                          HorizontalContentAlignment="Stretch"
-                         ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                         ScrollViewer.HorizontalScrollBarVisibility="Hidden"
                                  
                          SelectionChanged="Kontakti_SelectionChanged">
 
@@ -415,7 +415,7 @@
                          BorderThickness="0"
                          Foreground="{StaticResource TextOnDark}"
                          HorizontalContentAlignment="Stretch"
-                         ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                         ScrollViewer.HorizontalScrollBarVisibility="Hidden"
                          Visibility="Collapsed">
 
                             <ListBox.ItemContainerStyle>
@@ -493,7 +493,7 @@
 
                     <ScrollViewer Grid.Row="1"
                                   Background="{StaticResource ChatBackground}"
-                                  VerticalScrollBarVisibility="Disabled">
+                                  VerticalScrollBarVisibility="Hidden">
                         <StackPanel x:Name="PorukePanel" Margin="12,8,12,8"/>
                     </ScrollViewer>
 

@@ -67,5 +67,13 @@ namespace Klijent.Domen
         {
             throw new NotImplementedException();
         }
+        public override bool Equals(object obj)
+        {
+            if (ReferenceEquals(this, obj)) return true;
+            if (obj is not Korisnik other) return false;
+            return Id == other.Id;
+        }
+        public override int GetHashCode() => Id.GetHashCode();
+
     }
 }

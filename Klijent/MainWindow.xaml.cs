@@ -35,7 +35,10 @@ namespace Klijent
             Komunikacija.Instance.PorukaPrimljena += OnPorukaPrimljena;
             this.Closed += (_, __) => Komunikacija.Instance.PorukaPrimljena -= OnPorukaPrimljena;
 
-        
+            Komunikacija.Instance.PrijateljaDodaj += OnDodajPrijatelja;
+            Komunikacija.Instance.PrijateljaPrihvati += OnPrijateljaPrihvati;
+            Komunikacija.Instance.PrijateljaObrisi += OnPrijateljaObrisi;
+            Komunikacija.Instance.PrijateljaOdbij += OnPrijateljaOdbij;
             korisnikText.Text += "korisnik: "+k.Korisnicko_ime;
 
         }
@@ -55,7 +58,42 @@ namespace Klijent
                     DodajPoruka(p);
             }));
         }
+        private void OnDodajPrijatelja(PrijateljstvoView p)
+        {
+            Dispatcher.BeginInvoke(new Action(() =>
+            {
+                MainGuiKontroler.Instance.Prijateljstva.Add(p);
+            }));
+        }
+        private void OnPrijateljaPrihvati(Korisnik k)
+        {
+            Dispatcher.BeginInvoke(new Action(() =>
+            {
+                MainGuiKontroler.Instance.Kontakti.Add(k);
+            }));
 
+        }
+        private void OnPrijateljaObrisi(Korisnik k)
+        {
+            Dispatcher.BeginInvoke(new Action(() =>
+            {
+                MainGuiKontroler.Instance.Kontakti.Remove(k);//jako bitna stvar, uradicu override equalsa zato sto ovo nisu isti objekti.
+                primalac = null;
+                user.Text = "";
+                PorukePanel.Children.Clear();
+            }));
+
+        }
+        private void OnPrijateljaOdbij(PrijateljstvoView p)
+        {
+            Dispatcher.BeginInvoke(new Action(() =>
+            {
+                MainGuiKontroler.Instance.Prijateljstva.Remove(p);
+
+            }));
+
+        }
+        ///////////////////////////////////////////////////////////////////
         private void DodajPoruka(Poruka p)
         {
 
@@ -86,6 +124,8 @@ namespace Klijent
         private async void Send_Click(object sender, RoutedEventArgs e)
         {
             string poruka_text = messageText.Text;
+            if (primalac == null || string.IsNullOrWhiteSpace(poruka_text))
+                return;
             await MainGuiKontroler.Instance.Posalji(poruka_text, k.Id, primalac.Id);
             Poruka p = new Poruka(primalac.Id, k.Id, poruka_text);
             DodajPoruka(p);
