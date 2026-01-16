@@ -1,4 +1,4 @@
-server and multiple clients. Each client is a WPF-based Windows desktop application that connects to the server over TCP sockets to send and receive chat messages asynchronously. Communication is handled using low-level sockets, enabling real-time message delivery while keeping the UI responsive.
+A simple real-time chat application consisting of a server and multiple clients. Each client is a WPF-based Windows desktop application that connects to the server over TCP sockets to send and receive chat messages asynchronously. Communication is handled using low-level sockets, enabling real-time message delivery while keeping the UI responsive.
 
 The client interface displays the message history and provides an input field with a Send button for composing messages. Incoming messages are received and rendered in real time without polling or refresh actions.
 
