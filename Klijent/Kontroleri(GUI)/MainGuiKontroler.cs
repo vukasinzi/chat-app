@@ -1,12 +1,5 @@
 ﻿using Klijent.Domen;
-using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Input;
 using Zajednicki;
 using Zajednicki.Domen;
 
@@ -28,48 +21,47 @@ namespace Klijent.Kontroleri_GUI_
         public ObservableCollection<Korisnik> Kontakti { get; set; } = new ObservableCollection<Korisnik>();
         public ObservableCollection<PrijateljstvoView> Prijateljstva { get; set; } = new ObservableCollection<PrijateljstvoView>();
 
-        internal async Task<Korisnik> Pretrazi(string msgtext)
+        internal async Task<Korisnik?> Pretrazi(string msgtext)
         {
             try
             {
-                if (msgtext.IsWhiteSpace())
-                    throw new Exception("aaa");
+                if (string.IsNullOrWhiteSpace(msgtext))
+                    return null;
+
                 Komunikacija.Instance.Connect();
                 Odgovor o = await Komunikacija.Instance.Pretrazi(msgtext);
                 if (o == null || !o.Uspesno)
                 {
-                    MessageBox.Show("Ne postoji korisnik sa tim korisnickim imenom.");
-                    throw new Exception("aaa");
+                    await DialogService.ShowMessageAsync("Ne postoji korisnik sa tim korisnickim imenom.");
                     return null;
                 }
+
                 Korisnik l = (Korisnik)o.Rezultat;
                 return l;
-
             }
-            catch (Exception x)
+            catch
             {
                 return null;
             }
         }
-        internal async Task<string> Pretrazi(int id)
+
+        internal async Task<string?> Pretrazi(int id)
         {
             try
             {
-               
                 Komunikacija.Instance.Connect();
                 Odgovor o = await Komunikacija.Instance.Pretrazi(id);
                 if (o == null)
                     return null;
                 return (string)o.Rezultat;
-               
-
             }
-            catch (Exception x)
+            catch
             {
                 return null;
             }
         }
-        internal async Task vratiSvePrijatelje(Korisnik id)
+
+        internal async Task VratiSvePrijatelje(Korisnik id)
         {
             try
             {
@@ -84,7 +76,7 @@ namespace Klijent.Kontroleri_GUI_
                         Kontakti.Add(u);
                 }
             }
-            catch(Exception x)
+            catch
             {
                 return;
             }
@@ -97,11 +89,9 @@ namespace Klijent.Kontroleri_GUI_
                 Komunikacija.Instance.Connect();
                 Odgovor o = await Komunikacija.Instance.Posalji(poruka_text, posiljalac,primalac);
                 if (!o.Uspesno)
-                    MessageBox.Show("Nemoguce poslati poruku");
-
-                
+                    await DialogService.ShowMessageAsync("Nemoguće poslati poruku");
             }
-            catch(Exception x)
+            catch
             {
                 return;
             }
@@ -115,10 +105,10 @@ namespace Klijent.Kontroleri_GUI_
                 Odgovor o = await Komunikacija.Instance.DodajPrijatelja(id,id2);
                 if (o.Uspesno)
                     return true;
-                else
-                    throw new Exception("umri");
+
+                return false;
             }
-            catch (Exception x)
+            catch
             {
                 return false;
             }
@@ -165,8 +155,8 @@ namespace Klijent.Kontroleri_GUI_
                 Odgovor o = await Komunikacija.Instance.PrihvatiPrijatelja(prijatelj);
                 if (o.Uspesno)
                     return true;
-                else
-                    throw new Exception("umri");
+
+                return false;
 
             }
             catch
@@ -183,8 +173,8 @@ namespace Klijent.Kontroleri_GUI_
                 Odgovor o = await Komunikacija.Instance.OdbijPrijatelja(prijatelj);
                 if (o.Uspesno)
                     return true;
-                else
-                    throw new Exception("umri");
+
+                return false;
 
             }
             catch
@@ -193,7 +183,7 @@ namespace Klijent.Kontroleri_GUI_
             }
         }
 
-        internal async Task<List<Poruka>> ucitajSvePoruke(Korisnik primalac, Korisnik k)
+        internal async Task<List<Poruka>?> UcitajSvePoruke(Korisnik primalac, Korisnik k)
         {
             try
             {

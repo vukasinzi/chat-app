@@ -1,10 +1,8 @@
 ﻿using Klijent.Domen;
-using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Text;
-using System.Text.Json;
-using System.Windows;
+using Avalonia;
+using Avalonia.Controls.ApplicationLifetimes;
 using Zajednicki;
 
 namespace Klijent.Kontroleri_GUI_
@@ -27,7 +25,7 @@ namespace Klijent.Kontroleri_GUI_
             {
                 if (korisnicko_ime == "" || lozinka == "")
                 {
-                    MessageBox.Show("Morate uneti korisnicko ime i lozinku.");
+                    await DialogService.ShowMessageAsync("Morate uneti korisnicko ime i lozinku.");
                     return false;
                 }
                 Korisnik k = new Korisnik(korisnicko_ime, lozinka);
@@ -35,19 +33,21 @@ namespace Klijent.Kontroleri_GUI_
                 Odgovor o = await Komunikacija.Instance.LogInAsync(k);
                 if(o.Poruka == "logovan")
                 {
-                    MessageBox.Show("Vec je ulogovan korisnik sa pomenutim kredencijalima.");
+                    await DialogService.ShowMessageAsync("Već je ulogovan korisnik sa pomenutim kredencijalima.");
                     return false;
                 }
                 if(!o.Uspesno)
                 {
-                    MessageBox.Show("Pogresni kredencijali. Pokusajte ponovo.");
+                    await DialogService.ShowMessageAsync("Pogrešni kredencijali. Pokušajte ponovo.");
                     return false;
                 }
                 else
                 {
-                    MessageBox.Show("Uspesno logovanje. Dobro dosli, " + k.Korisnicko_ime + ".");
+                    await DialogService.ShowMessageAsync("Uspešno logovanje. Dobro došli, " + k.Korisnicko_ime + ".");
                     Korisnik l = (Korisnik)o.Rezultat;
                     MainWindow window = new MainWindow(l);
+                    if (Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
+                        desktop.MainWindow = window;
                     window.Show();
                     return true;
                 }
@@ -67,7 +67,7 @@ namespace Klijent.Kontroleri_GUI_
             {
                 if (korisnicko_ime == "" || lozinka == "")
                 {
-                    MessageBox.Show("Morate uneti korisnicko ime i lozinku.");
+                    await DialogService.ShowMessageAsync("Morate uneti korisnicko ime i lozinku.");
                     return false;
                 }
                 Korisnik k = new Korisnik(korisnicko_ime, lozinka);
@@ -75,21 +75,23 @@ namespace Klijent.Kontroleri_GUI_
                 Odgovor dostupan = await Komunikacija.Instance.Dostupan(k);
                 if (!dostupan.Uspesno)
                 {
-                    MessageBox.Show("Korisnicko ime je zauzeto.");
+                    await DialogService.ShowMessageAsync("Korisničko ime je zauzeto.");
                     return false;
                 }
                 Odgovor o = await Komunikacija.Instance.RegistrujSe(k);
                 if (o.Uspesno)
                 {
-                    MessageBox.Show("Uspesna registracija. Dobro dosli, " + k.Korisnicko_ime + ".");
+                    await DialogService.ShowMessageAsync("Uspešna registracija. Dobro došli, " + k.Korisnicko_ime + ".");
                     Korisnik l = (Korisnik)o.Rezultat;
                     MainWindow window = new MainWindow(l);
+                    if (Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
+                        desktop.MainWindow = window;
                     window.Show();
                     return true;
                 }
                 else
                 {
-                    MessageBox.Show("Registracija nije uspela.");
+                    await DialogService.ShowMessageAsync("Registracija nije uspela.");
                     return false;
                 }
             }

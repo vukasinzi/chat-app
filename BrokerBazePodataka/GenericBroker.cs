@@ -3,7 +3,9 @@ using Microsoft.Data.SqlClient;
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.IO;
 using System.Text;
+using System.Text.Json;
 using Zajednicki;
 using Zajednicki.Domen;
 
@@ -11,7 +13,7 @@ namespace BrokerBazePodataka
 {
     public class GenericBroker
     {
-        private const string connectionString = "Data Source=DESKTOP-K69I1LH\\SQLEXPRESS;Initial Catalog=chatapp_db;Integrated Security=True;Trust Server Certificate=True";
+        private static readonly string connectionString = LoadConnectionString();
         private SqlConnection con;
         private SqlTransaction tran;
         public GenericBroker()
@@ -51,6 +53,26 @@ namespace BrokerBazePodataka
             tran?.Rollback();
             tran?.Dispose();
             tran = null;
+        }
+
+        private static string LoadConnectionString()
+        {
+            string appSettingsPath = Path.Combine(AppContext.BaseDirectory, "appsettings.json");
+            if (!File.Exists(appSettingsPath))
+                throw new FileNotFoundException($"Nedostaje konfiguracija: {appSettingsPath}");
+
+            using FileStream stream = File.OpenRead(appSettingsPath);
+            using JsonDocument document = JsonDocument.Parse(stream);
+
+            if (document.RootElement.TryGetProperty("ConnectionStrings", out JsonElement connectionStrings) &&
+                connectionStrings.TryGetProperty("ChatAppDb", out JsonElement connectionStringElement))
+            {
+                string? value = connectionStringElement.GetString();
+                if (!string.IsNullOrWhiteSpace(value))
+                    return value;
+            }
+
+            throw new InvalidOperationException("ConnectionStrings:ChatAppDb nije podešen u appsettings.json.");
         }
 
 

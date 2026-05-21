@@ -37,6 +37,7 @@ namespace Server
                 while(socket.Connected && !token.IsCancellationRequested)
                 {
                     Zahtev z = await serializer.ReceiveAsync<Zahtev>(token);
+                    Console.WriteLine((z.Operacija));
                     Odgovor o = await ProcessRequests(z);
                     await serializer.SendAsync(o,token);
                 }
