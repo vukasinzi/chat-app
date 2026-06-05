@@ -16,10 +16,16 @@ namespace Server
         private Socket pushSocket;
         private CancellationTokenSource? cts;
         internal ConcurrentDictionary<string,ClientHandler> online;
+        private readonly string ip;
+        private readonly int port;
+        private readonly int pushPort;
 
         
-        public Server()
+        public Server(string ip, int port, int pushPort)
         {
+            this.ip = ip;
+            this.port = port;
+            this.pushPort = pushPort;
             online = new ConcurrentDictionary<string, ClientHandler>();
 
             serverskiSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
@@ -31,9 +37,9 @@ namespace Server
         {
             try
             {
-                serverskiSocket.Bind(new IPEndPoint(IPAddress.Parse("127.0.0.1"), 9999));
+                serverskiSocket.Bind(new IPEndPoint(IPAddress.Parse(ip), port));
                 serverskiSocket.Listen();
-                pushSocket.Bind(new IPEndPoint(IPAddress.Parse("127.0.0.1"), 10000));
+                pushSocket.Bind(new IPEndPoint(IPAddress.Parse(ip), pushPort));
                 pushSocket.Listen();
             }
             catch (Exception x)
