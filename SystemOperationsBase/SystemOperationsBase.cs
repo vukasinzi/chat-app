@@ -2,6 +2,8 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace SO
 {
@@ -12,24 +14,24 @@ namespace SO
         {
             broker = new GenericBroker();
         }
-        public void Execute()
+        public async Task ExecuteAsync(CancellationToken token = default)
         {
             try
             {
-                ExecuteConcreteOperation();
-                broker.Commit();
+                await ExecuteConcreteOperationAsync(token);
+                await broker.CommitAsync(token);
             }
-            catch(Exception x)
+            catch
             {
-                broker.Rollback();
-                Console.WriteLine(x.Message);
+                await broker.RollbackAsync();
+                throw;
             }
             finally
             {
-                broker.Close();
+                await broker.CloseAsync();
 
             }
         }
-        protected abstract void ExecuteConcreteOperation();
+        protected abstract Task ExecuteConcreteOperationAsync(CancellationToken token = default);
     }
 }

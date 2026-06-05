@@ -29,7 +29,7 @@ namespace Zajednicki
         {
             string json = JsonSerializer.Serialize(z);
             token.ThrowIfCancellationRequested();
-            await writer.WriteLineAsync(json);
+            await writer.WriteLineAsync(json.AsMemory(), token);
         }
         public async Task<T> ReceiveAsync<T>(CancellationToken token = default)
         {

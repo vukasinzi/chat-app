@@ -3,6 +3,8 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Zajednicki.Domen
 {
@@ -15,10 +17,11 @@ namespace Zajednicki.Domen
         string kljucPrimarni { get; set; }
         string kljucSpoljni { get; set; }
         string kriterijumWhere { get; set; }
+        Dictionary<string, object?> parametri { get; set; }
 
-        List<IObjekat> vratiObjekte(SqlDataReader dr);
-        List<IObjekat> vratiObjekteJoin(SqlDataReader dr);
-        IObjekat vratiObjekat(SqlDataReader dr);
-        IObjekat vratiObjekatJoin(SqlDataReader dr);
+        Task<List<IObjekat>> vratiObjekteAsync(SqlDataReader dr, CancellationToken token = default);
+        Task<List<IObjekat>> vratiObjekteJoinAsync(SqlDataReader dr, CancellationToken token = default);
+        Task<IObjekat> vratiObjekatAsync(SqlDataReader dr, CancellationToken token = default);
+        Task<IObjekat> vratiObjekatJoinAsync(SqlDataReader dr, CancellationToken token = default);
     }
 }

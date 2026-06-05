@@ -1,12 +1,5 @@
 ﻿using Klijent.Domen;
-using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Input;
 using Zajednicki;
 using Zajednicki.Domen;
 
@@ -28,52 +21,52 @@ namespace Klijent.Kontroleri_GUI_
         public ObservableCollection<Korisnik> Kontakti { get; set; } = new ObservableCollection<Korisnik>();
         public ObservableCollection<PrijateljstvoView> Prijateljstva { get; set; } = new ObservableCollection<PrijateljstvoView>();
 
-        internal async Task<Korisnik> Pretrazi(string msgtext)
+        internal async Task<Korisnik?> Pretrazi(string msgtext)
         {
             try
             {
-                if (msgtext.IsWhiteSpace())
-                    throw new Exception("aaa");
-                Komunikacija.Instance.Connect();
+                if (string.IsNullOrWhiteSpace(msgtext))
+                    return null;
+
+                await Komunikacija.Instance.ConnectAsync();
                 Odgovor o = await Komunikacija.Instance.Pretrazi(msgtext);
-                if (o == null || !o.Uspesno)
+                if (!o.Uspesno || o.Rezultat is not Korisnik l)
                 {
-                    MessageBox.Show("Ne postoji korisnik sa tim korisnickim imenom.");
-                    throw new Exception("aaa");
+                    await DialogService.ShowMessageAsync("Ne postoji korisnik sa tim korisnickim imenom.");
                     return null;
                 }
-                Korisnik l = (Korisnik)o.Rezultat;
+
                 return l;
-
             }
-            catch (Exception x)
+            catch(Exception x)
             {
+                await DialogService.ShowMessageAsync(x.Message);
                 return null;
             }
         }
-        internal async Task<string> Pretrazi(int id)
+
+        internal async Task<string?> Pretrazi(int id)
         {
             try
             {
-               
-                Komunikacija.Instance.Connect();
+                await Komunikacija.Instance.ConnectAsync();
                 Odgovor o = await Komunikacija.Instance.Pretrazi(id);
-                if (o == null)
+                if (!o.Uspesno || o.Rezultat is not string username)
                     return null;
-                return (string)o.Rezultat;
-               
-
+                return username;
             }
-            catch (Exception x)
+            catch(Exception x)
             {
+                await DialogService.ShowMessageAsync(x.Message);
                 return null;
             }
         }
-        internal async Task vratiSvePrijatelje(Korisnik id)
+
+        internal async Task VratiSvePrijatelje(Korisnik id)
         {
             try
             {
-                Komunikacija.Instance.Connect();
+                await Komunikacija.Instance.ConnectAsync();
                 Odgovor o = await Komunikacija.Instance.vratiSvePrijatelje(id);
                 Kontakti.Clear();
 
@@ -86,24 +79,28 @@ namespace Klijent.Kontroleri_GUI_
             }
             catch(Exception x)
             {
+                await DialogService.ShowMessageAsync(x.Message);
                 return;
             }
         }
 
-        internal async Task Posalji(string poruka_text, int posiljalac,int primalac)
+        internal async Task<bool> Posalji(string poruka_text, int posiljalac,int primalac)
         {
             try
             {
-                Komunikacija.Instance.Connect();
+                await Komunikacija.Instance.ConnectAsync();
                 Odgovor o = await Komunikacija.Instance.Posalji(poruka_text, posiljalac,primalac);
                 if (!o.Uspesno)
-                    MessageBox.Show("Nemoguce poslati poruku");
-
-                
+                {
+                    await DialogService.ShowMessageAsync("Nemoguće poslati poruku");
+                    return false;
+                }
+                return true;
             }
             catch(Exception x)
             {
-                return;
+                await DialogService.ShowMessageAsync(x.Message);
+                return false;
             }
         }
 
@@ -111,15 +108,16 @@ namespace Klijent.Kontroleri_GUI_
         {
             try
             {
-                Komunikacija.Instance.Connect();
+                await Komunikacija.Instance.ConnectAsync();
                 Odgovor o = await Komunikacija.Instance.DodajPrijatelja(id,id2);
                 if (o.Uspesno)
                     return true;
-                else
-                    throw new Exception("umri");
+
+                return false;
             }
-            catch (Exception x)
+            catch(Exception x)
             {
+                await DialogService.ShowMessageAsync(x.Message);
                 return false;
             }
         }
@@ -128,7 +126,7 @@ namespace Klijent.Kontroleri_GUI_
         {
             try
             {
-                Komunikacija.Instance.Connect();
+                await Komunikacija.Instance.ConnectAsync();
                 Odgovor o = await Komunikacija.Instance.VratiZahtevePrijatelja(id);
                 Prijateljstva.Clear();
                 if (o == null || o.Rezultat == null)
@@ -151,8 +149,9 @@ namespace Klijent.Kontroleri_GUI_
 
 
             }
-            catch
+            catch(Exception x)
             {
+                await DialogService.ShowMessageAsync(x.Message);
                 return;
             }
         }
@@ -161,16 +160,17 @@ namespace Klijent.Kontroleri_GUI_
         {
             try
             {
-                Komunikacija.Instance.Connect();
+                await Komunikacija.Instance.ConnectAsync();
                 Odgovor o = await Komunikacija.Instance.PrihvatiPrijatelja(prijatelj);
                 if (o.Uspesno)
                     return true;
-                else
-                    throw new Exception("umri");
+
+                return false;
 
             }
-            catch
+            catch(Exception x)
             {
+                await DialogService.ShowMessageAsync(x.Message);
                 return false;
             }
         }
@@ -179,25 +179,26 @@ namespace Klijent.Kontroleri_GUI_
         {
             try
             {
-                Komunikacija.Instance.Connect();
+                await Komunikacija.Instance.ConnectAsync();
                 Odgovor o = await Komunikacija.Instance.OdbijPrijatelja(prijatelj);
                 if (o.Uspesno)
                     return true;
-                else
-                    throw new Exception("umri");
+
+                return false;
 
             }
-            catch
+            catch(Exception x)
             {
+                await DialogService.ShowMessageAsync(x.Message);
                 return false;
             }
         }
 
-        internal async Task<List<Poruka>> ucitajSvePoruke(Korisnik primalac, Korisnik k)
+        internal async Task<List<Poruka>> UcitajSvePoruke(Korisnik primalac, Korisnik k)
         {
             try
             {
-                Komunikacija.Instance.Connect();
+                await Komunikacija.Instance.ConnectAsync();
                 Odgovor o = await Komunikacija.Instance.UcitajSvePoruke(primalac,k);
                
                 if (o.Rezultat != null)
@@ -207,9 +208,10 @@ namespace Klijent.Kontroleri_GUI_
                 return new List<Poruka>();
 
             }
-            catch
+            catch(Exception x)
             {
-                return null;
+                await DialogService.ShowMessageAsync(x.Message);
+                return new List<Poruka>();
             }
         }
 
@@ -217,14 +219,15 @@ namespace Klijent.Kontroleri_GUI_
         {
             try
             {
-                Komunikacija.Instance.Connect();
+                await Komunikacija.Instance.ConnectAsync();
                 Odgovor o = await Komunikacija.Instance.ObrisiPrijateljstvo(id1, id2);
 
                 return o.Uspesno;
 
             }
-            catch
+            catch(Exception x)
             {
+                await DialogService.ShowMessageAsync(x.Message);
                 return false;
             }
         }

@@ -1,5 +1,7 @@
-﻿using System;
+﻿using Microsoft.Extensions.Configuration;
+using System;
 using System.Diagnostics.Tracing;
+using System.IO;
 using System.Threading.Tasks;
 
 namespace Server
@@ -8,6 +10,15 @@ namespace Server
     {
         static async Task Main(string[] args)
         {
+            var config = new ConfigurationBuilder()
+                .SetBasePath(Directory.GetCurrentDirectory())
+                .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+                .Build();
+
+            string ip = config.GetValue<string>("ServerSettings:Ip") ?? "127.0.0.1";
+            int port = config.GetValue<int>("ServerSettings:Port");
+            int pushPort = config.GetValue<int>("ServerSettings:PushPort");
+
             Server? server = null;
             Task? serverTask = null;
             int i = 0;
@@ -15,11 +26,12 @@ namespace Server
             Console.WriteLine("Startovanje servera - 1. Gasenje servera - 0.");
             while (true)
             {
-                int.TryParse(Console.ReadLine(),out i);
+                string? unos = await Console.In.ReadLineAsync();
+                int.TryParse(unos,out i);
                 if (i == 0 && trenutly)
                 {
                     trenutly = false;
-                    server.Stop();
+                    server?.Stop();
                     if (serverTask != null)
                         await serverTask;
                     server = null;
@@ -28,7 +40,7 @@ namespace Server
                     continue;
                 }
                 if (i == 1 && !trenutly) { 
-                    server = new Server();
+                    server = new Server(ip, port, pushPort);
                     server.Listen();
                     serverTask = server.StartAsync();
                     Console.WriteLine("Server je upaljen.");

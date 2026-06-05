@@ -1,0 +1,124 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="Klijent.Login"
+        Title="Login"
+        Width="360"
+        Height="250"
+        CanResize="False"
+        WindowStartupLocation="CenterScreen"
+        Background="#101011">
+  <Window.Resources>
+    <SolidColorBrush x:Key="PrimaryBackground" Color="#101011" />
+    <SolidColorBrush x:Key="CardBackground" Color="#151616" />
+    <SolidColorBrush x:Key="InputBackground" Color="#101111" />
+    <SolidColorBrush x:Key="InputBorder" Color="#3b3e3d" />
+    <SolidColorBrush x:Key="AccentBrush" Color="#3b3e3d" />
+    <SolidColorBrush x:Key="SecondaryBrush" Color="#252626" />
+    <SolidColorBrush x:Key="TextOnDark" Color="#f0f6f0" />
+    <SolidColorBrush x:Key="TextMuted" Color="#8a8f8a" />
+  </Window.Resources>
+
+  <Window.Styles>
+    <Style Selector="TextBox.login-input">
+      <Setter Property="Background" Value="{StaticResource InputBackground}" />
+      <Setter Property="Foreground" Value="{StaticResource TextOnDark}" />
+      <Setter Property="BorderBrush" Value="{StaticResource InputBorder}" />
+      <Setter Property="BorderThickness" Value="1" />
+      <Setter Property="FontSize" Value="12" />
+      <Setter Property="MinHeight" Value="32" />
+    </Style>
+
+    <Style Selector="Button.primary">
+      <Setter Property="Background" Value="{StaticResource AccentBrush}" />
+      <Setter Property="Foreground" Value="{StaticResource TextOnDark}" />
+      <Setter Property="BorderThickness" Value="0" />
+      <Setter Property="FontSize" Value="12" />
+      <Setter Property="MinWidth" Value="110" />
+      <Setter Property="Height" Value="32" />
+      <Setter Property="Cursor" Value="Hand" />
+    </Style>
+
+    <Style Selector="Button.primary:pointerover">
+      <Setter Property="Background" Value="#4a4d4d" />
+    </Style>
+
+    <Style Selector="Button.primary:pressed">
+      <Setter Property="Background" Value="#2b2d2e" />
+    </Style>
+
+    <Style Selector="Button.secondary">
+      <Setter Property="Background" Value="{StaticResource SecondaryBrush}" />
+      <Setter Property="Foreground" Value="{StaticResource TextOnDark}" />
+      <Setter Property="BorderThickness" Value="0" />
+      <Setter Property="FontSize" Value="12" />
+      <Setter Property="MinWidth" Value="110" />
+      <Setter Property="Height" Value="32" />
+      <Setter Property="Cursor" Value="Hand" />
+    </Style>
+
+    <Style Selector="Button.secondary:pointerover">
+      <Setter Property="Background" Value="#303232" />
+    </Style>
+
+    <Style Selector="Button.secondary:pressed">
+      <Setter Property="Background" Value="#202122" />
+    </Style>
+  </Window.Styles>
+
+  <Grid Background="{StaticResource PrimaryBackground}">
+    <Border HorizontalAlignment="Center"
+            VerticalAlignment="Center"
+            Width="300"
+            Padding="20"
+            Background="{StaticResource CardBackground}"
+            CornerRadius="12">
+      <StackPanel Spacing="14">
+        <TextBlock Text="Login"
+                   HorizontalAlignment="Center"
+                   FontSize="18"
+                   FontWeight="SemiBold"
+                   Foreground="{StaticResource TextOnDark}" />
+
+        <Grid RowDefinitions="Auto,Auto"
+              ColumnDefinitions="Auto,*"
+              RowSpacing="10"
+              ColumnSpacing="12">
+          <TextBlock Grid.Row="0"
+                     Grid.Column="0"
+                     VerticalAlignment="Center"
+                     Foreground="{StaticResource TextOnDark}"
+                     Text="korisničko ime:" />
+          <TextBox x:Name="txt_korisnicko_ime"
+                   Grid.Row="0"
+                   Grid.Column="1"
+                   Classes="login-input"
+                   Text="domagoj" />
+
+          <TextBlock Grid.Row="1"
+                     Grid.Column="0"
+                     VerticalAlignment="Center"
+                     Foreground="{StaticResource TextOnDark}"
+                     Text="lozinka:" />
+          <TextBox x:Name="txt_lozinka"
+                   Grid.Row="1"
+                   Grid.Column="1"
+                   Classes="login-input"
+                   PasswordChar="●"
+                   Text="domagoj" />
+        </Grid>
+
+        <StackPanel Orientation="Horizontal"
+                    HorizontalAlignment="Center"
+                    Spacing="10">
+          <Button x:Name="LoginButton"
+                  Classes="primary"
+                  Content="uloguj se"
+                  Click="Login_Click" />
+          <Button Classes="secondary"
+                  Content="registruj se"
+                  Click="Register_Click" />
+        </StackPanel>
+      </StackPanel>
+    </Border>
+  </Grid>
+</Window>

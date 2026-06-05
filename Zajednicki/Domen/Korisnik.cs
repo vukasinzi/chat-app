@@ -2,6 +2,9 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Text.Json.Serialization;
+using System.Threading;
+using System.Threading.Tasks;
 using Zajednicki.Domen;
 
 namespace Klijent.Domen
@@ -11,12 +14,20 @@ namespace Klijent.Domen
         public int Id { get; set; }
         public string Korisnicko_ime { get; set; }
         public string Lozinka { get; set; }
+        [JsonIgnore]
         public string nazivTabele { get; set; } = "Korisnik";
+        [JsonIgnore]
         public object koloneNaziv { get; set; } = "korisnicko_ime,lozinka";
+        [JsonIgnore]
         public string vrednostiNaziv { get; set; }
+        [JsonIgnore]
         public string kljucPrimarni { get; set; } = "id";
+        [JsonIgnore]
         public string kljucSpoljni { get; set; } = "";
+        [JsonIgnore]
         public string kriterijumWhere { get; set; } = "";
+        [JsonIgnore]
+        public Dictionary<string, object?> parametri { get; set; } = new Dictionary<string, object?>();
         public Korisnik(string korisnicko_ime, string lozinka)
         {
  
@@ -28,30 +39,28 @@ namespace Klijent.Domen
 
         }
 
-        public List<IObjekat> vratiObjekte(SqlDataReader dr)
+        public Task<List<IObjekat>> vratiObjekteAsync(SqlDataReader dr, CancellationToken token = default)
         {
             throw new NotImplementedException();
         }
 
-        public List<IObjekat> vratiObjekteJoin(SqlDataReader dr)
+        public async Task<List<IObjekat>> vratiObjekteJoinAsync(SqlDataReader dr, CancellationToken token = default)
         {
             List<IObjekat> koki = new List<IObjekat>();
-            while(dr.Read())
+            while(await dr.ReadAsync(token))
             {
                 Korisnik kok1 = new Korisnik();
                 kok1.Korisnicko_ime = (string)dr["korisnicko_ime"];
                 koki.Add(kok1);
             }
-            if (koki.Count == 0)
-                return null;
             return koki;           
         }
 
-        public IObjekat vratiObjekat(SqlDataReader dr)
+        public async Task<IObjekat> vratiObjekatAsync(SqlDataReader dr, CancellationToken token = default)
         {
 
             Korisnik k = null;
-            while (dr.Read())
+            while (await dr.ReadAsync(token))
             {
                 k = new Korisnik();
                 k.Id = (int)dr["Id"];
@@ -63,7 +72,7 @@ namespace Klijent.Domen
             return k;
         }
 
-        public IObjekat vratiObjekatJoin(SqlDataReader dr)
+        public Task<IObjekat> vratiObjekatJoinAsync(SqlDataReader dr, CancellationToken token = default)
         {
             throw new NotImplementedException();
         }

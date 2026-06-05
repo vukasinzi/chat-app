@@ -1,0 +1,60 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="Klijent.MessageDialog"
+        Width="380"
+        Height="190"
+        CanResize="False"
+        WindowStartupLocation="CenterOwner"
+        Background="#101011"
+        Title="Obaveštenje">
+  <Window.Resources>
+    <SolidColorBrush x:Key="CardBackground" Color="#151616" />
+    <SolidColorBrush x:Key="AccentBrush" Color="#3b3e3d" />
+    <SolidColorBrush x:Key="TextOnDark" Color="#f0f6f0" />
+    <SolidColorBrush x:Key="TextMuted" Color="#8a8f8a" />
+  </Window.Resources>
+
+  <Window.Styles>
+    <Style Selector="Button.primary">
+      <Setter Property="Background" Value="{StaticResource AccentBrush}" />
+      <Setter Property="Foreground" Value="{StaticResource TextOnDark}" />
+      <Setter Property="BorderThickness" Value="0" />
+      <Setter Property="MinWidth" Value="96" />
+      <Setter Property="Height" Value="30" />
+      <Setter Property="Cursor" Value="Hand" />
+    </Style>
+
+    <Style Selector="Button.primary:pointerover">
+      <Setter Property="Background" Value="#4a4d4d" />
+    </Style>
+
+    <Style Selector="Button.primary:pressed">
+      <Setter Property="Background" Value="#2b2d2e" />
+    </Style>
+  </Window.Styles>
+
+  <Border Margin="16"
+          Padding="18"
+          Background="{StaticResource CardBackground}"
+          CornerRadius="12">
+    <Grid RowDefinitions="Auto,*,Auto">
+      <TextBlock x:Name="DialogTitle"
+                 FontSize="16"
+                 FontWeight="SemiBold"
+                 Foreground="{StaticResource TextOnDark}" />
+
+      <TextBlock x:Name="DialogMessage"
+                 Grid.Row="1"
+                 Margin="0,14,0,0"
+                 TextWrapping="Wrap"
+                 VerticalAlignment="Top"
+                 Foreground="{StaticResource TextMuted}" />
+
+      <Button Grid.Row="2"
+              HorizontalAlignment="Right"
+              Classes="primary"
+              Content="U redu"
+              Click="Ok_Click" />
+    </Grid>
+  </Border>
+</Window>

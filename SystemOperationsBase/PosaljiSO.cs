@@ -2,6 +2,8 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 using Zajednicki.Domen;
 
 namespace SO
@@ -14,11 +16,18 @@ namespace SO
         {
             this.p = p;
             DateTime datum = DateTime.Now;
-            p.vrednostiNaziv = $"{p.primalac_id},{p.posiljalac_id},'{p.poruka_text}','{datum:yyyy-MM-dd HH:mm:ss}'";
+            p.vrednostiNaziv = "@primalac,@posiljalac,@poruka_text,@datum";
+            p.parametri = new Dictionary<string, object?>
+            {
+                { "@primalac", p.primalac_id },
+                { "@posiljalac", p.posiljalac_id },
+                { "@poruka_text", p.poruka_text },
+                { "@datum", datum }
+            };
         }
-        protected override void ExecuteConcreteOperation()
+        protected override async Task ExecuteConcreteOperationAsync(CancellationToken token = default)
         {
-            int a = broker.Insert(p);
+            int a = await broker.InsertAsync(p, token);
             if (a > 0)
                 Uspesno = true;
         }

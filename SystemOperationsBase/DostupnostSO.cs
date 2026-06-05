@@ -2,6 +2,8 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace SO
 {
@@ -12,12 +14,15 @@ namespace SO
         public DostupnostSO(Korisnik k)
         {
             this.k = k;
-            k.kriterijumWhere = $"korisnicko_ime = '{k.Korisnicko_ime}'";
+            k.kriterijumWhere = "korisnicko_ime = @korisnicko_ime";
+            k.parametri = new Dictionary<string, object?>
+            {
+                { "@korisnicko_ime", k.Korisnicko_ime }
+            };
         }
-        protected override void ExecuteConcreteOperation()
+        protected override async Task ExecuteConcreteOperationAsync(CancellationToken token = default)
         {
-            broker.getCriteria(k);
-            if ((Korisnik)broker.getCriteria(k) == null)
+            if ((Korisnik)await broker.getCriteriaAsync(k, token) == null)
                 Uspesno = true;
         }
     }

@@ -1,0 +1,296 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="Klijent.MainWindow"
+        Title="Chat"
+        Width="1200"
+        Height="700"
+        MinWidth="960"
+        MinHeight="620"
+        Background="#101011"
+        WindowStartupLocation="CenterScreen">
+  <Window.Resources>
+    <SolidColorBrush x:Key="PrimaryBackground" Color="#101011" />
+    <SolidColorBrush x:Key="HeaderBackground" Color="#070708" />
+    <SolidColorBrush x:Key="SidebarBackground" Color="#161717" />
+    <SolidColorBrush x:Key="ChatBackground" Color="#1f2021" />
+    <SolidColorBrush x:Key="PanelBorderBrush" Color="#292a2b" />
+    <SolidColorBrush x:Key="AccentBrush" Color="#303332" />
+    <SolidColorBrush x:Key="AccentStrongBrush" Color="#3b3e3d" />
+    <SolidColorBrush x:Key="SecondaryBrush" Color="#202120" />
+    <SolidColorBrush x:Key="TextOnDark" Color="#f0f6f0" />
+    <SolidColorBrush x:Key="TextOnMedium" Color="#c4cbc4" />
+    <SolidColorBrush x:Key="TextMuted" Color="#8a8f8a" />
+  </Window.Resources>
+
+  <Window.Styles>
+    <Style Selector="TextBox.search-box">
+      <Setter Property="Background" Value="Transparent" />
+      <Setter Property="BorderThickness" Value="0" />
+      <Setter Property="Foreground" Value="{StaticResource TextOnDark}" />
+      <Setter Property="FontSize" Value="12" />
+    </Style>
+
+    <Style Selector="TextBox.chat-input">
+      <Setter Property="Background" Value="#101111" />
+      <Setter Property="Foreground" Value="{StaticResource TextOnDark}" />
+      <Setter Property="BorderBrush" Value="{StaticResource AccentStrongBrush}" />
+      <Setter Property="BorderThickness" Value="1" />
+      <Setter Property="FontSize" Value="13" />
+      <Setter Property="MinHeight" Value="38" />
+    </Style>
+
+    <Style Selector="Button.primary">
+      <Setter Property="Background" Value="{StaticResource AccentStrongBrush}" />
+      <Setter Property="Foreground" Value="{StaticResource TextOnDark}" />
+      <Setter Property="BorderThickness" Value="0" />
+      <Setter Property="Height" Value="36" />
+      <Setter Property="MinWidth" Value="86" />
+      <Setter Property="Cursor" Value="Hand" />
+    </Style>
+
+    <Style Selector="Button.primary:pointerover">
+      <Setter Property="Background" Value="#4a4d4d" />
+    </Style>
+
+    <Style Selector="Button.primary:pressed">
+      <Setter Property="Background" Value="#2b2d2e" />
+    </Style>
+
+    <Style Selector="Button.search-button">
+      <Setter Property="Background" Value="Transparent" />
+      <Setter Property="BorderThickness" Value="0" />
+      <Setter Property="Width" Value="32" />
+      <Setter Property="Height" Value="28" />
+      <Setter Property="Cursor" Value="Hand" />
+      <Setter Property="Foreground" Value="{StaticResource TextMuted}" />
+    </Style>
+
+    <Style Selector="Button.search-button:pointerover">
+      <Setter Property="Foreground" Value="{StaticResource TextOnDark}" />
+    </Style>
+
+    <Style Selector="RadioButton.sidebar-mode">
+      <Setter Property="Background" Value="Transparent" />
+      <Setter Property="Foreground" Value="{StaticResource TextMuted}" />
+      <Setter Property="BorderBrush" Value="{StaticResource PanelBorderBrush}" />
+      <Setter Property="BorderThickness" Value="1" />
+      <Setter Property="Padding" Value="10,5" />
+      <Setter Property="Cursor" Value="Hand" />
+    </Style>
+
+    <Style Selector="RadioButton.sidebar-mode:pointerover">
+      <Setter Property="Foreground" Value="{StaticResource TextOnMedium}" />
+      <Setter Property="Background" Value="#1FFFFFFF" />
+    </Style>
+
+    <Style Selector="RadioButton.sidebar-mode:checked">
+      <Setter Property="Background" Value="{StaticResource AccentStrongBrush}" />
+      <Setter Property="BorderBrush" Value="{StaticResource AccentStrongBrush}" />
+      <Setter Property="Foreground" Value="{StaticResource TextOnDark}" />
+    </Style>
+
+    <Style Selector="Button.round-action">
+      <Setter Property="Width" Value="28" />
+      <Setter Property="Height" Value="28" />
+      <Setter Property="Padding" Value="0" />
+      <Setter Property="BorderThickness" Value="1" />
+      <Setter Property="BorderBrush" Value="{StaticResource PanelBorderBrush}" />
+      <Setter Property="Background" Value="#1c1c1e" />
+      <Setter Property="Cursor" Value="Hand" />
+      <Setter Property="FontSize" Value="13" />
+      <Setter Property="FontWeight" Value="SemiBold" />
+    </Style>
+
+    <Style Selector="Button.round-action:pointerover">
+      <Setter Property="Background" Value="#2c2c2e" />
+    </Style>
+
+    <Style Selector="Button.round-action:pressed">
+      <Setter Property="Background" Value="#3a3a3c" />
+    </Style>
+
+    <Style Selector="Button.round-action.success">
+      <Setter Property="Foreground" Value="#63d471" />
+    </Style>
+
+    <Style Selector="Button.round-action.danger">
+      <Setter Property="Foreground" Value="#ff7b7b" />
+    </Style>
+  </Window.Styles>
+
+  <Grid Background="{StaticResource PrimaryBackground}" RowDefinitions="48,*">
+    <Border Grid.Row="0"
+            Background="{StaticResource HeaderBackground}"
+            BorderBrush="{StaticResource PanelBorderBrush}"
+            BorderThickness="0,0,0,1">
+      <Grid Margin="12,0" ColumnDefinitions="*,Auto">
+        <TextBlock VerticalAlignment="Center"
+                   FontSize="15"
+                   FontWeight="SemiBold"
+                   Foreground="{StaticResource TextOnDark}"
+                   Text="Chat Klijent" />
+        <TextBlock x:Name="korisnikText"
+                   Grid.Column="1"
+                   VerticalAlignment="Center"
+                   FontSize="12"
+                   Foreground="{StaticResource TextMuted}"
+                   Text="" />
+      </Grid>
+    </Border>
+
+    <Grid Grid.Row="1" ColumnDefinitions="280,*">
+      <Border Grid.Column="0"
+              Background="{StaticResource SidebarBackground}"
+              BorderBrush="{StaticResource PanelBorderBrush}"
+              BorderThickness="0,0,1,0">
+        <Grid Margin="10" RowDefinitions="Auto,Auto,*">
+          <Border Grid.Row="0"
+                  Margin="0,0,0,10"
+                  Padding="6"
+                  Background="{StaticResource SecondaryBrush}"
+                  CornerRadius="8">
+            <Grid ColumnDefinitions="*,Auto">
+              <TextBox x:Name="SearchTextBox"
+                       Grid.Column="0"
+                       Classes="search-box"
+                       PlaceholderText="Dodaj prijatelja..." />
+              <Button Grid.Column="1"
+                      Classes="search-button"
+                      Click="SearchButton_Click"
+                      Content="🔍" />
+            </Grid>
+          </Border>
+
+          <Grid Grid.Row="1"
+                Margin="0,0,0,10"
+                ColumnDefinitions="*,*"
+                ColumnSpacing="10">
+            <RadioButton x:Name="RazgovoriBtn"
+                         Grid.Column="0"
+                         Classes="sidebar-mode"
+                         GroupName="SidebarMode"
+                         Content="Razgovori"
+                         IsChecked="True"
+                         Click="Razgovori_Click" />
+            <RadioButton x:Name="PrijateljiBtn"
+                         Grid.Column="1"
+                         Classes="sidebar-mode"
+                         GroupName="SidebarMode"
+                         Content="Prijatelji"
+                         Click="PrijateljiBtn_Click" />
+          </Grid>
+
+          <Grid Grid.Row="2">
+            <ListBox x:Name="Kontakti"
+                     Background="Transparent"
+                     BorderThickness="0"
+                     Foreground="{StaticResource TextOnDark}"
+                     ItemsSource="{Binding Kontakti}"
+                     SelectionChanged="Kontakti_SelectionChanged">
+              <ListBox.ItemTemplate>
+                <DataTemplate>
+                  <Border Margin="0,2"
+                          Padding="10,8"
+                          Background="#202223"
+                          CornerRadius="10">
+                    <Grid ColumnDefinitions="*,Auto">
+                      <TextBlock VerticalAlignment="Center"
+                                 FontSize="13"
+                                 Foreground="{StaticResource TextOnDark}"
+                                 Text="{Binding Korisnicko_ime}"
+                                 TextTrimming="CharacterEllipsis" />
+                      <Button Grid.Column="1"
+                              Margin="8,0,0,0"
+                              Classes="round-action danger"
+                              Click="Delete_Click"
+                              Content="×"
+                              Tag="{Binding}" />
+                    </Grid>
+                  </Border>
+                </DataTemplate>
+              </ListBox.ItemTemplate>
+            </ListBox>
+
+            <ListBox x:Name="Prijatelji"
+                     Background="Transparent"
+                     BorderThickness="0"
+                     Foreground="{StaticResource TextOnDark}"
+                     ItemsSource="{Binding Prijateljstva}"
+                     IsVisible="False">
+              <ListBox.ItemTemplate>
+                <DataTemplate>
+                  <Border Margin="0,2"
+                          Padding="10,8"
+                          Background="#202223"
+                          CornerRadius="10">
+                    <Grid ColumnDefinitions="*,Auto,Auto"
+                          ColumnSpacing="8">
+                      <TextBlock VerticalAlignment="Center"
+                                 FontSize="13"
+                                 Foreground="{StaticResource TextOnDark}"
+                                 Text="{Binding Korisnicko_ime}"
+                                 TextTrimming="CharacterEllipsis" />
+                      <Button Grid.Column="1"
+                              Classes="round-action success"
+                              Click="Accept_Click"
+                              Content="✓"
+                              Tag="{Binding}" />
+                      <Button Grid.Column="2"
+                              Classes="round-action danger"
+                              Click="Decline_Click"
+                              Content="×"
+                              Tag="{Binding}" />
+                    </Grid>
+                  </Border>
+                </DataTemplate>
+              </ListBox.ItemTemplate>
+            </ListBox>
+          </Grid>
+        </Grid>
+      </Border>
+
+      <Border Grid.Column="1" Background="{StaticResource ChatBackground}">
+        <Grid RowDefinitions="56,*,58">
+          <Border Grid.Row="0"
+                  Background="#191a1b"
+                  BorderBrush="{StaticResource PanelBorderBrush}"
+                  BorderThickness="0,0,0,1">
+            <Grid Margin="14,0">
+              <TextBlock x:Name="user"
+                         VerticalAlignment="Center"
+                         FontSize="16"
+                         FontWeight="SemiBold"
+                         Foreground="{StaticResource TextOnDark}"
+                         Text="" />
+            </Grid>
+          </Border>
+
+          <ScrollViewer x:Name="ChatScroll"
+                        Grid.Row="1"
+                        Background="{StaticResource ChatBackground}"
+                        VerticalScrollBarVisibility="Auto">
+            <StackPanel x:Name="PorukePanel" Margin="12,10" Spacing="4" />
+          </ScrollViewer>
+
+          <Border Grid.Row="2"
+                  Background="#181919"
+                  BorderBrush="{StaticResource PanelBorderBrush}"
+                  BorderThickness="0,1,0,0">
+            <Grid Margin="8" ColumnDefinitions="*,Auto" ColumnSpacing="8">
+              <TextBox x:Name="messageText"
+                       Grid.Column="0"
+                       Classes="chat-input"
+                       KeyDown="MessageText_KeyDown"
+                       PlaceholderText="Napiši poruku..." />
+              <Button x:Name="Send"
+                      Grid.Column="1"
+                      Classes="primary"
+                      Click="Send_Click"
+                      Content="Pošalji" />
+            </Grid>
+          </Border>
+        </Grid>
+      </Border>
+    </Grid>
+  </Grid>
+</Window>
