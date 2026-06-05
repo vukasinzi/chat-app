@@ -81,13 +81,8 @@ namespace Klijent.Kontroleri_GUI_
                 Odgovor o = await Komunikacija.Instance.RegistrujSe(k);
                 if (o.Uspesno)
                 {
-                    await DialogService.ShowMessageAsync("Uspešna registracija. Dobro došli, " + k.Korisnicko_ime + ".");
-                    Korisnik l = (Korisnik)o.Rezultat;
-                    MainWindow window = new MainWindow(l);
-                    if (Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
-                        desktop.MainWindow = window;
-                    window.Show();
-                    return true;
+                    await DialogService.ShowMessageAsync("Uspešna registracija. Možete se ulogovati.");
+                    return false;
                 }
                 else
                 {
