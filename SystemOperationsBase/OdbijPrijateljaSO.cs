@@ -16,7 +16,13 @@ namespace SO
         protected override void ExecuteConcreteOperation()
         {
            
-            p.kriterijumWhere = $"status = 'ceka se' and korisnik1_id = {p.korisnik1_id} and korisnik2_id = {p.korisnik2_id}";
+            p.kriterijumWhere = "status = @status and korisnik1_id = @korisnik1_id and korisnik2_id = @korisnik2_id";
+            p.parametri = new Dictionary<string, object?>
+            {
+                { "@status", "ceka se" },
+                { "@korisnik1_id", p.korisnik1_id },
+                { "@korisnik2_id", p.korisnik2_id }
+            };
             int a = broker.DeleteCriteria(p);
             if (a > 0)
                 Uspesno = true;

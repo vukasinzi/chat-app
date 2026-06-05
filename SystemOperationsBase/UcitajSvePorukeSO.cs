@@ -19,9 +19,15 @@ namespace SO
         protected override void ExecuteConcreteOperation()
         {
             Poruka p = new Poruka();
-            p.kriterijumWhere = $"(primalac = {primalac} and posiljalac = {posiljalac}) OR (posiljalac = {primalac} and primalac = {posiljalac})";
+            p.kriterijumWhere = "(primalac = @primalac and posiljalac = @posiljalac) OR (posiljalac = @primalac and primalac = @posiljalac)";
+            p.parametri = new Dictionary<string, object?>
+            {
+                { "@primalac", primalac },
+                { "@posiljalac", posiljalac }
+            };
             List<IObjekat> obj = broker.GetAllCriteria(p);
-            Lista = obj.OfType<Poruka>().ToList();
+            if (obj != null)
+                Lista = obj.OfType<Poruka>().ToList();
             
         }
     }

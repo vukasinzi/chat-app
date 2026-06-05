@@ -14,7 +14,14 @@ namespace SO
         {
             this.p = p;
             DateTime datum = DateTime.Now;
-            p.vrednostiNaziv = $"{p.primalac_id},{p.posiljalac_id},'{p.poruka_text}','{datum:yyyy-MM-dd HH:mm:ss}'";
+            p.vrednostiNaziv = "@primalac,@posiljalac,@poruka_text,@datum";
+            p.parametri = new Dictionary<string, object?>
+            {
+                { "@primalac", p.primalac_id },
+                { "@posiljalac", p.posiljalac_id },
+                { "@poruka_text", p.poruka_text },
+                { "@datum", datum }
+            };
         }
         protected override void ExecuteConcreteOperation()
         {

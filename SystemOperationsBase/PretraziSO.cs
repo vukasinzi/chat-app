@@ -19,13 +19,21 @@ namespace SO
             this.msgText = msgText;
             k.Korisnicko_ime = msgText;
             k.koloneNaziv = "id,korisnicko_ime";
-            k.kriterijumWhere = $"korisnicko_ime = '{k.Korisnicko_ime}'";
+            k.kriterijumWhere = "korisnicko_ime = @korisnicko_ime";
+            k.parametri = new Dictionary<string, object?>
+            {
+                { "@korisnicko_ime", k.Korisnicko_ime }
+            };
         }
         public PretraziSO(int primalac)
         {
             this.primalac = primalac;
             k.koloneNaziv = "korisnicko_ime";
-            k.kriterijumWhere = $"id = '{primalac}'";
+            k.kriterijumWhere = "id = @id";
+            k.parametri = new Dictionary<string, object?>
+            {
+                { "@id", primalac }
+            };
         }
         protected override void ExecuteConcreteOperation()
         {

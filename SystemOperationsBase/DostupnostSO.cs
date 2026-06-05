@@ -12,11 +12,14 @@ namespace SO
         public DostupnostSO(Korisnik k)
         {
             this.k = k;
-            k.kriterijumWhere = $"korisnicko_ime = '{k.Korisnicko_ime}'";
+            k.kriterijumWhere = "korisnicko_ime = @korisnicko_ime";
+            k.parametri = new Dictionary<string, object?>
+            {
+                { "@korisnicko_ime", k.Korisnicko_ime }
+            };
         }
         protected override void ExecuteConcreteOperation()
         {
-            broker.getCriteria(k);
             if ((Korisnik)broker.getCriteria(k) == null)
                 Uspesno = true;
         }

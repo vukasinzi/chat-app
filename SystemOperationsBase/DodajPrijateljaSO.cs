@@ -15,9 +15,15 @@ namespace SO
         }
         protected override void ExecuteConcreteOperation()
         {
-            p.vrednostiNaziv = $"{p.korisnik1_id},{p.korisnik2_id},'ceka se'";
-            p.kriterijumWhere = $"(korisnik1_id LIKE {p.korisnik1_id} AND korisnik2_id LIKE {p.korisnik2_id}) AND " +
-                $"(korisnik1_id LIKE {p.korisnik2_id} AND korisnik2_id LIKE {p.korisnik1_id})";
+            p.vrednostiNaziv = "@korisnik1_id,@korisnik2_id,@status";
+            p.kriterijumWhere = "(korisnik1_id = @korisnik1_id AND korisnik2_id = @korisnik2_id) OR " +
+                "(korisnik1_id = @korisnik2_id AND korisnik2_id = @korisnik1_id)";
+            p.parametri = new Dictionary<string, object?>
+            {
+                { "@korisnik1_id", p.korisnik1_id },
+                { "@korisnik2_id", p.korisnik2_id },
+                { "@status", "ceka se" }
+            };
             if (broker.getCriteria(p) == null)
             {
 

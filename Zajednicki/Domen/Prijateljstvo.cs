@@ -3,6 +3,7 @@ using Microsoft.Data.SqlClient;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Text.Json.Serialization;
 
 namespace Zajednicki.Domen
 {
@@ -24,13 +25,22 @@ namespace Zajednicki.Domen
         public int korisnik1_id { get; set; }
         public int korisnik2_id { get; set; }
         public string status { get; set; }
+        [JsonIgnore]
         public string nazivTabele { get; set; } = "prijateljstvo";
+        [JsonIgnore]
         public object koloneNaziv { get; set; } = "id_prijateljstva,korisnik1_id,korisnik2_id,status";
+        [JsonIgnore]
         public string vrednostiNaziv { get; set; }
+        [JsonIgnore]
         public string kljucPrimarni { get; set; } = "id_prijateljstva";
+        [JsonIgnore]
         public string kljucSpoljni { get; set; } = "korisnik1_id";
+        [JsonIgnore]
         public string kljucSpoljni2 { get; set; } = "korisnik2_id";
+        [JsonIgnore]
         public string kriterijumWhere { get; set; }
+        [JsonIgnore]
+        public Dictionary<string, object?> parametri { get; set; } = new Dictionary<string, object?>();
 
         public IObjekat vratiObjekat(SqlDataReader dr)
         {

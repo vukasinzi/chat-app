@@ -15,6 +15,7 @@ namespace Zajednicki.Domen
         string kljucPrimarni { get; set; }
         string kljucSpoljni { get; set; }
         string kriterijumWhere { get; set; }
+        Dictionary<string, object?> parametri { get; set; }
 
         List<IObjekat> vratiObjekte(SqlDataReader dr);
         List<IObjekat> vratiObjekteJoin(SqlDataReader dr);

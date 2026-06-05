@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Text.Json.Serialization;
 using Zajednicki.Domen;
 
 namespace Klijent.Domen
@@ -11,12 +12,20 @@ namespace Klijent.Domen
         public int Id { get; set; }
         public string Korisnicko_ime { get; set; }
         public string Lozinka { get; set; }
+        [JsonIgnore]
         public string nazivTabele { get; set; } = "Korisnik";
+        [JsonIgnore]
         public object koloneNaziv { get; set; } = "korisnicko_ime,lozinka";
+        [JsonIgnore]
         public string vrednostiNaziv { get; set; }
+        [JsonIgnore]
         public string kljucPrimarni { get; set; } = "id";
+        [JsonIgnore]
         public string kljucSpoljni { get; set; } = "";
+        [JsonIgnore]
         public string kriterijumWhere { get; set; } = "";
+        [JsonIgnore]
+        public Dictionary<string, object?> parametri { get; set; } = new Dictionary<string, object?>();
         public Korisnik(string korisnicko_ime, string lozinka)
         {
  

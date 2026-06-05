@@ -15,29 +15,42 @@ namespace SO
         {
             id = k;
             p.korisnik1_id = k.Id;
-            p.kriterijumWhere = $"(korisnik1_id = {p.korisnik1_id} OR korisnik2_id = {p.korisnik1_id}) and status = 'prihvacen'";
+            p.kriterijumWhere = "(korisnik1_id = @korisnik_id OR korisnik2_id = @korisnik_id) and status = @status";
+            p.parametri = new Dictionary<string, object?>
+            {
+                { "@korisnik_id", p.korisnik1_id },
+                { "@status", "prihvacen" }
+            };
         }
         protected override void ExecuteConcreteOperation()
         {
             List<IObjekat> x = broker.GetAllCriteria(p);
-            List<Prijateljstvo> listaPrijatelja = x.OfType<Prijateljstvo>().ToList();
 
             if (x != null)
             {
+                List<Prijateljstvo> listaPrijatelja = x.OfType<Prijateljstvo>().ToList();
                foreach(Prijateljstvo y in listaPrijatelja)
                 {
                     if(y.korisnik1_id == p.korisnik1_id)
                     {
                         Korisnik privremeni = new Korisnik();
                         privremeni.Id = y.korisnik2_id;
-                        privremeni.kriterijumWhere = $"id = {privremeni.Id}";
+                        privremeni.kriterijumWhere = "id = @id";
+                        privremeni.parametri = new Dictionary<string, object?>
+                        {
+                            { "@id", privremeni.Id }
+                        };
                         if (broker.getCriteria(privremeni) is Korisnik k) lista.Add(k);
                     }
                     else if (y.korisnik2_id == p.korisnik1_id)
                     {
                         Korisnik privremeni = new Korisnik();
                         privremeni.Id = y.korisnik1_id;
-                        privremeni.kriterijumWhere = $"id = {privremeni.Id}";
+                        privremeni.kriterijumWhere = "id = @id";
+                        privremeni.parametri = new Dictionary<string, object?>
+                        {
+                            { "@id", privremeni.Id }
+                        };
                         if (broker.getCriteria(privremeni) is Korisnik k) lista.Add(k);
                     }
                 }
