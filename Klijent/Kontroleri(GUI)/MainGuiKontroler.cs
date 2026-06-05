@@ -28,7 +28,7 @@ namespace Klijent.Kontroleri_GUI_
                 if (string.IsNullOrWhiteSpace(msgtext))
                     return null;
 
-                Komunikacija.Instance.Connect();
+                await Komunikacija.Instance.ConnectAsync();
                 Odgovor o = await Komunikacija.Instance.Pretrazi(msgtext);
                 if (o == null || !o.Uspesno)
                 {
@@ -49,7 +49,7 @@ namespace Klijent.Kontroleri_GUI_
         {
             try
             {
-                Komunikacija.Instance.Connect();
+                await Komunikacija.Instance.ConnectAsync();
                 Odgovor o = await Komunikacija.Instance.Pretrazi(id);
                 if (o == null)
                     return null;
@@ -65,7 +65,7 @@ namespace Klijent.Kontroleri_GUI_
         {
             try
             {
-                Komunikacija.Instance.Connect();
+                await Komunikacija.Instance.ConnectAsync();
                 Odgovor o = await Komunikacija.Instance.vratiSvePrijatelje(id);
                 Kontakti.Clear();
 
@@ -82,18 +82,22 @@ namespace Klijent.Kontroleri_GUI_
             }
         }
 
-        internal async Task Posalji(string poruka_text, int posiljalac,int primalac)
+        internal async Task<bool> Posalji(string poruka_text, int posiljalac,int primalac)
         {
             try
             {
-                Komunikacija.Instance.Connect();
+                await Komunikacija.Instance.ConnectAsync();
                 Odgovor o = await Komunikacija.Instance.Posalji(poruka_text, posiljalac,primalac);
                 if (!o.Uspesno)
+                {
                     await DialogService.ShowMessageAsync("Nemoguće poslati poruku");
+                    return false;
+                }
+                return true;
             }
             catch
             {
-                return;
+                return false;
             }
         }
 
@@ -101,7 +105,7 @@ namespace Klijent.Kontroleri_GUI_
         {
             try
             {
-                Komunikacija.Instance.Connect();
+                await Komunikacija.Instance.ConnectAsync();
                 Odgovor o = await Komunikacija.Instance.DodajPrijatelja(id,id2);
                 if (o.Uspesno)
                     return true;
@@ -118,7 +122,7 @@ namespace Klijent.Kontroleri_GUI_
         {
             try
             {
-                Komunikacija.Instance.Connect();
+                await Komunikacija.Instance.ConnectAsync();
                 Odgovor o = await Komunikacija.Instance.VratiZahtevePrijatelja(id);
                 Prijateljstva.Clear();
                 if (o == null || o.Rezultat == null)
@@ -151,7 +155,7 @@ namespace Klijent.Kontroleri_GUI_
         {
             try
             {
-                Komunikacija.Instance.Connect();
+                await Komunikacija.Instance.ConnectAsync();
                 Odgovor o = await Komunikacija.Instance.PrihvatiPrijatelja(prijatelj);
                 if (o.Uspesno)
                     return true;
@@ -169,7 +173,7 @@ namespace Klijent.Kontroleri_GUI_
         {
             try
             {
-                Komunikacija.Instance.Connect();
+                await Komunikacija.Instance.ConnectAsync();
                 Odgovor o = await Komunikacija.Instance.OdbijPrijatelja(prijatelj);
                 if (o.Uspesno)
                     return true;
@@ -187,7 +191,7 @@ namespace Klijent.Kontroleri_GUI_
         {
             try
             {
-                Komunikacija.Instance.Connect();
+                await Komunikacija.Instance.ConnectAsync();
                 Odgovor o = await Komunikacija.Instance.UcitajSvePoruke(primalac,k);
                
                 if (o.Rezultat != null)
@@ -207,7 +211,7 @@ namespace Klijent.Kontroleri_GUI_
         {
             try
             {
-                Komunikacija.Instance.Connect();
+                await Komunikacija.Instance.ConnectAsync();
                 Odgovor o = await Komunikacija.Instance.ObrisiPrijateljstvo(id1, id2);
 
                 return o.Uspesno;

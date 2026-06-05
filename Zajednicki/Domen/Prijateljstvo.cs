@@ -4,6 +4,8 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Text.Json.Serialization;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Zajednicki.Domen
 {
@@ -42,11 +44,11 @@ namespace Zajednicki.Domen
         [JsonIgnore]
         public Dictionary<string, object?> parametri { get; set; } = new Dictionary<string, object?>();
 
-        public IObjekat vratiObjekat(SqlDataReader dr)
+        public async Task<IObjekat> vratiObjekatAsync(SqlDataReader dr, CancellationToken token = default)
         {
 
             Prijateljstvo p = null;
-            while (dr.Read())
+            while (await dr.ReadAsync(token))
             {
 
                 p = new Prijateljstvo();
@@ -61,15 +63,15 @@ namespace Zajednicki.Domen
             return p;
         }
 
-        public IObjekat vratiObjekatJoin(SqlDataReader dr)
+        public Task<IObjekat> vratiObjekatJoinAsync(SqlDataReader dr, CancellationToken token = default)
         {
             throw new NotImplementedException();
         }
 
-        public List<IObjekat> vratiObjekte(SqlDataReader dr)
+        public async Task<List<IObjekat>> vratiObjekteAsync(SqlDataReader dr, CancellationToken token = default)
         {
             List<IObjekat> lista = new List<IObjekat>();
-            while (dr.Read())
+            while (await dr.ReadAsync(token))
             {
 
                 Prijateljstvo p = new Prijateljstvo();
@@ -84,7 +86,7 @@ namespace Zajednicki.Domen
             return lista;
         }
 
-        public List<IObjekat> vratiObjekteJoin(SqlDataReader dr)
+        public Task<List<IObjekat>> vratiObjekteJoinAsync(SqlDataReader dr, CancellationToken token = default)
         {
             throw new NotImplementedException();
         }

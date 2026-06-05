@@ -2,6 +2,8 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 using Zajednicki;
 using Zajednicki.Domen;
 
@@ -35,9 +37,9 @@ namespace SO
                 { "@id", primalac }
             };
         }
-        protected override void ExecuteConcreteOperation()
+        protected override async Task ExecuteConcreteOperationAsync(CancellationToken token = default)
         {
-            o.Rezultat = (Korisnik)broker.getCriteria(k);
+            o.Rezultat = (Korisnik)await broker.getCriteriaAsync(k, token);
             if (o.Rezultat != null)
             {
                 prinm = ((Korisnik)o.Rezultat).Korisnicko_ime;

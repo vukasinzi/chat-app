@@ -2,6 +2,8 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 using Zajednicki;
 
 namespace SO
@@ -21,9 +23,9 @@ namespace SO
                 { "@lozinka", k.Lozinka }
             };
         }
-        protected override void ExecuteConcreteOperation()
+        protected override async Task ExecuteConcreteOperationAsync(CancellationToken token = default)
         {
-            o.Rezultat = (Korisnik)broker.getCriteria(k);
+            o.Rezultat = (Korisnik)await broker.getCriteriaAsync(k, token);
             if (o.Rezultat != null)
                 o.Uspesno = true;
             

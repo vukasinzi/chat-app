@@ -4,6 +4,8 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Text.Json.Serialization;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Zajednicki.Domen
 {
@@ -40,10 +42,10 @@ namespace Zajednicki.Domen
             this.poruka_text = poruka_text;
         }
 
-        public List<IObjekat> vratiObjekte(SqlDataReader dr)
+        public async Task<List<IObjekat>> vratiObjekteAsync(SqlDataReader dr, CancellationToken token = default)
         {
             List<IObjekat> popara = new List<IObjekat>();
-            while (dr.Read())
+            while (await dr.ReadAsync(token))
             {
                 Poruka pop1 = new Poruka();
                 pop1.primalac_id = (int)dr["primalac"];
@@ -58,17 +60,17 @@ namespace Zajednicki.Domen
             
         }
 
-        public List<IObjekat> vratiObjekteJoin(SqlDataReader dr)
+        public Task<List<IObjekat>> vratiObjekteJoinAsync(SqlDataReader dr, CancellationToken token = default)
         {
             throw new NotImplementedException();
         }
 
-        public IObjekat vratiObjekat(SqlDataReader dr)
+        public Task<IObjekat> vratiObjekatAsync(SqlDataReader dr, CancellationToken token = default)
         {
             throw new NotImplementedException();
         }
 
-        public IObjekat vratiObjekatJoin(SqlDataReader dr)
+        public Task<IObjekat> vratiObjekatJoinAsync(SqlDataReader dr, CancellationToken token = default)
         {
             throw new NotImplementedException();
         }

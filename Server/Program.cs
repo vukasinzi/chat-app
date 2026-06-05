@@ -15,11 +15,12 @@ namespace Server
             Console.WriteLine("Startovanje servera - 1. Gasenje servera - 0.");
             while (true)
             {
-                int.TryParse(Console.ReadLine(),out i);
+                string? unos = await Console.In.ReadLineAsync();
+                int.TryParse(unos,out i);
                 if (i == 0 && trenutly)
                 {
                     trenutly = false;
-                    server.Stop();
+                    server?.Stop();
                     if (serverTask != null)
                         await serverTask;
                     server = null;

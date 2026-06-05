@@ -2,6 +2,8 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace SO
 {
@@ -18,9 +20,9 @@ namespace SO
                 { "@korisnicko_ime", k.Korisnicko_ime }
             };
         }
-        protected override void ExecuteConcreteOperation()
+        protected override async Task ExecuteConcreteOperationAsync(CancellationToken token = default)
         {
-            if ((Korisnik)broker.getCriteria(k) == null)
+            if ((Korisnik)await broker.getCriteriaAsync(k, token) == null)
                 Uspesno = true;
         }
     }

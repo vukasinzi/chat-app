@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 using Zajednicki.Domen;
 
 namespace SO
@@ -16,7 +18,7 @@ namespace SO
             posiljalac = zahtev.Item2;
             Lista = new List<Poruka>();
         }
-        protected override void ExecuteConcreteOperation()
+        protected override async Task ExecuteConcreteOperationAsync(CancellationToken token = default)
         {
             Poruka p = new Poruka();
             p.kriterijumWhere = "(primalac = @primalac and posiljalac = @posiljalac) OR (posiljalac = @primalac and primalac = @posiljalac)";
@@ -25,7 +27,7 @@ namespace SO
                 { "@primalac", primalac },
                 { "@posiljalac", posiljalac }
             };
-            List<IObjekat> obj = broker.GetAllCriteria(p);
+            List<IObjekat> obj = await broker.GetAllCriteriaAsync(p, token);
             if (obj != null)
                 Lista = obj.OfType<Poruka>().ToList();
             

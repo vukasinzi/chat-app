@@ -4,6 +4,8 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 using Zajednicki;
 using Zajednicki.Domen;
 
@@ -11,23 +13,25 @@ namespace BrokerBazePodataka
 {
     public class GenericBroker
     {
-        private static readonly string password = Environment.GetEnvironmentVariable("MSSQL_SA_PASSWORD");
+        private static readonly string password = Environment.GetEnvironmentVariable("MSSQL_SA_PASSWORD")
+            ?? throw new InvalidOperationException("MSSQL_SA_PASSWORD nije podešen.");
         private static readonly string connectionString = $"Server=localhost,1433;Database=chatapp_db;User Id=sa;Password={password};TrustServerCertificate=True;";
         private SqlConnection con;
-        private SqlTransaction tran;
+        private SqlTransaction? tran;
         public GenericBroker()
         {
             con = new SqlConnection(connectionString);
         }
-        public void Open()
+        public async Task OpenAsync(CancellationToken token = default)
         {
            if(con.State != ConnectionState.Open)
-                con.Open();
+                await con.OpenAsync(token);
         }
-        public SqlCommand CreateCmd(string sql)
+        public async Task<SqlCommand> CreateCmdAsync(string sql, CancellationToken token = default)
         {
-            Open();
-            tran ??= con.BeginTransaction();
+            await OpenAsync(token);
+            if (tran == null)
+                tran = (SqlTransaction)await con.BeginTransactionAsync(token);
 
             return new SqlCommand(sql, con, tran);
         }
@@ -37,85 +41,88 @@ namespace BrokerBazePodataka
                 cmd.Parameters.AddWithValue(p.Key, p.Value ?? DBNull.Value);
         }
 
-        public void Close()
+        public async Task CloseAsync()
         {
-            tran?.Rollback();
-            tran?.Dispose();
-            tran = null;
+            if (tran != null)
+                await RollbackAsync();
             if (con.State != ConnectionState.Closed)
-                con.Close();
+                await con.CloseAsync();
             con.Dispose();
         }
-        public void Commit()
+        public async Task CommitAsync(CancellationToken token = default)
         {
-            tran?.Commit();
-            tran?.Dispose();
-            tran = null;
+            if (tran != null)
+            {
+                await tran.CommitAsync(token);
+                tran.Dispose();
+                tran = null;
+            }
         }
-        public void Rollback()
+        public async Task RollbackAsync(CancellationToken token = default)
         {
-            tran?.Rollback();
-            tran?.Dispose();
-            tran = null;
+            if (tran != null)
+            {
+                await tran.RollbackAsync(token);
+                tran.Dispose();
+                tran = null;
+            }
         }
 
         //broker
       
-        public IObjekat getCriteria(IObjekat obj)
+        public async Task<IObjekat> getCriteriaAsync(IObjekat obj, CancellationToken token = default)
         {
 
             IObjekat result;
             string sql = $"select * from {obj.nazivTabele} where {obj.kriterijumWhere}";
-            SqlCommand cmd = CreateCmd(sql);
+            using SqlCommand cmd = await CreateCmdAsync(sql, token);
             AddParams(cmd, obj);
 
-            SqlDataReader dr = cmd.ExecuteReader();
-            result = obj.vratiObjekat(dr);
-            dr.Close();
+            using SqlDataReader dr = await cmd.ExecuteReaderAsync(token);
+            result = await obj.vratiObjekatAsync(dr, token);
             return result;
         }
 
-        public int Insert(IObjekat k)
+        public async Task<int> InsertAsync(IObjekat k, CancellationToken token = default)
         {
              
             string sql = $"insert into {k.nazivTabele} values({k.vrednostiNaziv})";
-            SqlCommand cmd = CreateCmd(sql);
+            using SqlCommand cmd = await CreateCmdAsync(sql, token);
             AddParams(cmd, k);
 
-            int affectedRows = cmd.ExecuteNonQuery();
+            int affectedRows = await cmd.ExecuteNonQueryAsync(token);
             return affectedRows;
         }
-        public List<IObjekat> GetAllCriteria(IObjekat obj)
+        public async Task<List<IObjekat>> GetAllCriteriaAsync(IObjekat obj, CancellationToken token = default)
         {
             
             List<IObjekat> result;
             string sql = $"select {obj.koloneNaziv} from {obj.nazivTabele} where {obj.kriterijumWhere} ";
-            SqlCommand cmd = CreateCmd(sql);
+            using SqlCommand cmd = await CreateCmdAsync(sql, token);
             AddParams(cmd, obj);
    
-            SqlDataReader dr = cmd.ExecuteReader();
-            result = obj.vratiObjekte(dr);
-            dr.Close();
+            using SqlDataReader dr = await cmd.ExecuteReaderAsync(token);
+            result = await obj.vratiObjekteAsync(dr, token);
             return result;
         }
 
-        public int UpdateCriteria(IObjekat obj)
+        public async Task<int> UpdateCriteriaAsync(IObjekat obj, CancellationToken token = default)
         {
             string sql = $"update {obj.nazivTabele} set {obj.vrednostiNaziv} where {obj.kriterijumWhere}";
-            SqlCommand cmd = CreateCmd(sql);
+            using SqlCommand cmd = await CreateCmdAsync(sql, token);
             AddParams(cmd, obj);
 
-            int affectedRows = cmd.ExecuteNonQuery();
+            int affectedRows = await cmd.ExecuteNonQueryAsync(token);
             return affectedRows;
         }
 
-        public int DeleteCriteria(IObjekat obj)
+        public async Task<int> DeleteCriteriaAsync(IObjekat obj, CancellationToken token = default)
         {
             string sql = $"delete from {obj.nazivTabele} where {obj.kriterijumWhere}";
-            SqlCommand cmd = CreateCmd(sql);
+            using SqlCommand cmd = await CreateCmdAsync(sql, token);
             AddParams(cmd, obj);
 
-            int affectedRows = cmd.ExecuteNonQuery();
+            int affectedRows = await cmd.ExecuteNonQueryAsync(token);
             return affectedRows;
         }
     }

@@ -2,6 +2,8 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 using Zajednicki.Domen;
 
 namespace SO
@@ -22,9 +24,9 @@ namespace SO
                 { "@status", "prihvacen" }
             };
         }
-        protected override void ExecuteConcreteOperation()
+        protected override async Task ExecuteConcreteOperationAsync(CancellationToken token = default)
         {
-            List<IObjekat> x = broker.GetAllCriteria(p);
+            List<IObjekat> x = await broker.GetAllCriteriaAsync(p, token);
 
             if (x != null)
             {
@@ -40,7 +42,7 @@ namespace SO
                         {
                             { "@id", privremeni.Id }
                         };
-                        if (broker.getCriteria(privremeni) is Korisnik k) lista.Add(k);
+                        if (await broker.getCriteriaAsync(privremeni, token) is Korisnik k) lista.Add(k);
                     }
                     else if (y.korisnik2_id == p.korisnik1_id)
                     {
@@ -51,7 +53,7 @@ namespace SO
                         {
                             { "@id", privremeni.Id }
                         };
-                        if (broker.getCriteria(privremeni) is Korisnik k) lista.Add(k);
+                        if (await broker.getCriteriaAsync(privremeni, token) is Korisnik k) lista.Add(k);
                     }
                 }
             }

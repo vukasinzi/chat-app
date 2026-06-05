@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 using Zajednicki.Domen;
 
 namespace SO
@@ -21,9 +23,9 @@ namespace SO
             };
 
         }
-        protected override void ExecuteConcreteOperation()
+        protected override async Task ExecuteConcreteOperationAsync(CancellationToken token = default)
         {
-            int a = broker.DeleteCriteria(prijateljstvo);
+            int a = await broker.DeleteCriteriaAsync(prijateljstvo, token);
             if (a > 0)
                 Uspesno = true;
 

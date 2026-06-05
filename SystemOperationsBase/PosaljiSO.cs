@@ -2,6 +2,8 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 using Zajednicki.Domen;
 
 namespace SO
@@ -23,9 +25,9 @@ namespace SO
                 { "@datum", datum }
             };
         }
-        protected override void ExecuteConcreteOperation()
+        protected override async Task ExecuteConcreteOperationAsync(CancellationToken token = default)
         {
-            int a = broker.Insert(p);
+            int a = await broker.InsertAsync(p, token);
             if (a > 0)
                 Uspesno = true;
         }

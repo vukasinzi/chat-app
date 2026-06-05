@@ -128,7 +128,9 @@ public partial class MainWindow : Window
         if (_primalac is null || string.IsNullOrWhiteSpace(porukaText))
             return;
 
-        await MainGuiKontroler.Instance.Posalji(porukaText, _korisnik.Id, _primalac.Id);
+        bool poslato = await MainGuiKontroler.Instance.Posalji(porukaText, _korisnik.Id, _primalac.Id);
+        if (!poslato)
+            return;
 
         var poruka = new Poruka(_primalac.Id, _korisnik.Id, porukaText);
         DodajPoruku(poruka);

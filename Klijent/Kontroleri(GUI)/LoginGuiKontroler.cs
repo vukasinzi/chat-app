@@ -29,7 +29,7 @@ namespace Klijent.Kontroleri_GUI_
                     return false;
                 }
                 Korisnik k = new Korisnik(korisnicko_ime, lozinka);
-                Komunikacija.Instance.Connect();
+                await Komunikacija.Instance.ConnectAsync();
                 Odgovor o = await Komunikacija.Instance.LogInAsync(k);
                 if(o.Poruka == "logovan")
                 {
@@ -71,7 +71,7 @@ namespace Klijent.Kontroleri_GUI_
                     return false;
                 }
                 Korisnik k = new Korisnik(korisnicko_ime, lozinka);
-                Komunikacija.Instance.Connect();
+                await Komunikacija.Instance.ConnectAsync();
                 Odgovor dostupan = await Komunikacija.Instance.Dostupan(k);
                 if (!dostupan.Uspesno)
                 {

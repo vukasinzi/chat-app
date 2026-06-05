@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 using Zajednicki.Domen;
 
 namespace SO
@@ -14,7 +16,7 @@ namespace SO
         {
             this.id = (int)id;
         }
-        protected override void ExecuteConcreteOperation()
+        protected override async Task ExecuteConcreteOperationAsync(CancellationToken token = default)
         {
             Prijateljstvo p = new Prijateljstvo();
             p.korisnik2_id = id;
@@ -24,7 +26,7 @@ namespace SO
                 { "@korisnik2_id", p.korisnik2_id },
                 { "@status", "ceka se" }
             };
-            List<IObjekat> x = broker.GetAllCriteria(p);
+            List<IObjekat> x = await broker.GetAllCriteriaAsync(p, token);
             if (x != null)
                 listaPrijatelja = x.OfType<Prijateljstvo>().ToList();
             if (listaPrijatelja == null)

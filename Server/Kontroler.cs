@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Runtime.Versioning;
 using System.Text;
+using System.Threading;
 using Zajednicki;
 using Zajednicki.Domen;
 
@@ -11,7 +12,7 @@ namespace Server
 {
     public class Kontroler
     {
-        public static Kontroler instance;
+        public static Kontroler? instance;
         public static Kontroler Instance
         {
             get
@@ -22,98 +23,98 @@ namespace Server
             }
         }
 
-        internal async Task<bool> Dostupan(Korisnik korisnik)
+        internal async Task<bool> Dostupan(Korisnik korisnik, CancellationToken token = default)
         {
             SystemOperationsBase dos = new DostupnostSO(korisnik);
-            dos.Execute();
+            await dos.ExecuteAsync(token);
             return ((DostupnostSO)dos).Uspesno;
         }
 
-        internal async Task<Odgovor> LogIn(Korisnik korisnik)
+        internal async Task<Odgovor> LogIn(Korisnik korisnik, CancellationToken token = default)
         {
             SystemOperationsBase log = new LoginSO(korisnik);
-            log.Execute();
+            await log.ExecuteAsync(token);
             return ((LoginSO)log).o;
 
         }
 
-        internal async Task<bool> Posalji(Poruka poruka)
+        internal async Task<bool> Posalji(Poruka poruka, CancellationToken token = default)
         {
             SystemOperationsBase pos = new PosaljiSO(poruka);
-            pos.Execute();
+            await pos.ExecuteAsync(token);
             return ((PosaljiSO)pos).Uspesno;
         }
 
-        internal async Task<Odgovor> Pretrazi(string v)
+        internal async Task<Odgovor> Pretrazi(string v, CancellationToken token = default)
         {
             SystemOperationsBase pob = new PretraziSO(v);
-            pob.Execute();
+            await pob.ExecuteAsync(token);
             return ((PretraziSO)pob).o;
         }
 
-        internal async Task<string> Pretrazi(int v)
+        internal async Task<string> Pretrazi(int v, CancellationToken token = default)
         {
             SystemOperationsBase pob = new PretraziSO(v);
-            pob.Execute();
+            await pob.ExecuteAsync(token);
             return ((PretraziSO)pob).prinm;
         }
 
 
-        internal async Task<List<Korisnik>> Prijatelji(Korisnik id)
+        internal async Task<List<Korisnik>> Prijatelji(Korisnik id, CancellationToken token = default)
         {
             SystemOperationsBase pob = new VratiPrijateljeSO(id);
-            pob.Execute();
+            await pob.ExecuteAsync(token);
             return ((VratiPrijateljeSO)pob).lista;
 
         }
-        internal async Task<bool> DodajPrijatelja(Prijateljstvo p)
+        internal async Task<bool> DodajPrijatelja(Prijateljstvo p, CancellationToken token = default)
         {
             SystemOperationsBase dod = new DodajPrijateljaSO(p);
-            dod.Execute();
+            await dod.ExecuteAsync(token);
            return ((DodajPrijateljaSO)dod).Uspesno;
 
         }
 
-        internal async Task<Odgovor> RegistrujSe(Korisnik korisnik)
+        internal async Task<Odgovor> RegistrujSe(Korisnik korisnik, CancellationToken token = default)
         {
             SystemOperationsBase rog = new RegistrujSeSO(korisnik);
-            rog.Execute();
+            await rog.ExecuteAsync(token);
             return ((RegistrujSeSO)rog).o;
         }
 
-        internal async Task<List<Prijateljstvo>> VratiZahtevePrijatelja(int? id)
+        internal async Task<List<Prijateljstvo>> VratiZahtevePrijatelja(int? id, CancellationToken token = default)
         {
             SystemOperationsBase vog = new VratiZahtevePrijateljaSO(id);
-            vog.Execute();
+            await vog.ExecuteAsync(token);
             return ((VratiZahtevePrijateljaSO)vog).listaPrijatelja;
 
         }
-        internal async Task<bool> PrihvatiPrijatelja(Prijateljstvo p)
+        internal async Task<bool> PrihvatiPrijatelja(Prijateljstvo p, CancellationToken token = default)
         {
             SystemOperationsBase pog = new PrihvatiPrijateljaSO(p);
-            pog.Execute();
+            await pog.ExecuteAsync(token);
             return ((PrihvatiPrijateljaSO)pog).Uspesno; 
 
         }
 
-        internal async Task<bool> OdbijPrijatelja(Prijateljstvo prijateljstvo)
+        internal async Task<bool> OdbijPrijatelja(Prijateljstvo prijateljstvo, CancellationToken token = default)
         {
             SystemOperationsBase oog = new OdbijPrijateljaSO(prijateljstvo);
-            oog.Execute();
+            await oog.ExecuteAsync(token);
             return ((OdbijPrijateljaSO)oog).Uspesno;
         }
 
-        internal async Task<List<Poruka>> UcitajSvePoruke(Tuple<int, int> tuple)
+        internal async Task<List<Poruka>> UcitajSvePoruke(Tuple<int, int> tuple, CancellationToken token = default)
         {
             SystemOperationsBase uog = new UcitajSvePorukeSO(tuple);
-            uog.Execute();
+            await uog.ExecuteAsync(token);
             return ((UcitajSvePorukeSO)uog).Lista;
         }
 
-        internal async Task<bool> ObrisiPrijateljstvo(Prijateljstvo prijateljstvo)
+        internal async Task<bool> ObrisiPrijateljstvo(Prijateljstvo prijateljstvo, CancellationToken token = default)
         {
             SystemOperationsBase oog = new ObrisiPrijateljstvoSO(prijateljstvo);
-            oog.Execute();
+            await oog.ExecuteAsync(token);
             return ((ObrisiPrijateljstvoSO)oog).Uspesno;
         }
     }

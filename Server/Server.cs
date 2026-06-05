@@ -14,7 +14,7 @@ namespace Server
     {
         private Socket serverskiSocket;
         private Socket pushSocket;
-        private CancellationTokenSource cts;
+        private CancellationTokenSource? cts;
         internal ConcurrentDictionary<string,ClientHandler> online;
 
         
