@@ -41,6 +41,21 @@ namespace Klijent
                 return true;
             return false;
         }
+        private Odgovor Greska(Exception x)
+        {
+            Debug.WriteLine(x.Message);
+            Odgovor o = new Odgovor();
+            o.Uspesno = false;
+            o.Poruka = x.Message;
+            return o;
+        }
+        private Odgovor Greska(string poruka)
+        {
+            Odgovor o = new Odgovor();
+            o.Uspesno = false;
+            o.Poruka = poruka;
+            return o;
+        }
         internal async Task ConnectAsync(CancellationToken token = default)
         {
             try
@@ -55,6 +70,7 @@ namespace Klijent
             catch (Exception x)
             {
                 Debug.WriteLine(x.Message);
+                throw;
             }
         }
         internal async Task<Odgovor> LogInAsync(Korisnik k, CancellationToken token = default)
@@ -77,9 +93,7 @@ namespace Klijent
             }
             catch (Exception ex)
             {
-                Odgovor o = new Odgovor();
-                o.Poruka = "greska";
-                return o;
+                return Greska(ex);
             }
         }
 
@@ -140,9 +154,7 @@ namespace Klijent
             }
             catch(Exception x)
             {
-                Odgovor o = new Odgovor();
-                o.Poruka = "greska";
-                return o;
+                return Greska(x);
             }
         }
 
@@ -158,9 +170,7 @@ namespace Klijent
             }
             catch (Exception ex)
             {
-                Odgovor o = new Odgovor();
-                o.Poruka = "greska";
-                return o;
+                return Greska(ex);
             }
         }
 
@@ -171,16 +181,14 @@ namespace Klijent
                 Zahtev z = new Zahtev(Operacija.Pretraga, text);
                 await serializer.SendAsync(z, token);
                 Odgovor o = await serializer.ReceiveAsync<Odgovor>(token);
-                if (o.Rezultat == null)
-                    return null;
+                if (!o.Uspesno || o.Rezultat == null)
+                    return o;
                 Korisnik k = serializer.ReadType<Korisnik>((JsonElement)o.Rezultat);
                 o.Rezultat = k;
                 return o;
             }catch(Exception x)
             {
-                Odgovor o = new Odgovor();
-                o.Poruka = "greska";
-                return o;
+                return Greska(x);
             }
         }
         internal async Task<Odgovor> Pretrazi(int id, CancellationToken token = default)
@@ -190,24 +198,15 @@ namespace Klijent
                 Zahtev z = new Zahtev(Operacija.Pretraga2, id);
                 await serializer.SendAsync(z, token);
                 Odgovor o = await serializer.ReceiveAsync<Odgovor>(token);
-                if (o.Rezultat is Korisnik)
-                {
-                    Korisnik k = serializer.ReadType<Korisnik>((JsonElement)o.Rezultat);
-                    o.Rezultat = k;
+                if (o.Rezultat == null)
                     return o;
-                }
-                else
-                {
-                    if(o.Rezultat!= null)
-                        o.Rezultat = serializer.ReadType<string>((JsonElement)o.Rezultat);
-                    return o;
-                }
+                if (o.Rezultat is JsonElement je)
+                    o.Rezultat = serializer.ReadType<string>(je);
+                return o;
             }
             catch (Exception x)
             {
-                Odgovor o = new Odgovor();
-                o.Poruka = "greska";
-                return o;
+                return Greska(x);
             }
         }
 
@@ -227,8 +226,7 @@ namespace Klijent
             }
             catch(Exception x)
             {
-                Odgovor o = new Odgovor();
-                return o;
+                return Greska(x);
             }
 
         }
@@ -247,8 +245,7 @@ namespace Klijent
             }
             catch(Exception x)
             {
-                Odgovor o = new Odgovor();
-                return o;
+                return Greska(x);
             }
         }
 
@@ -269,8 +266,7 @@ namespace Klijent
             }
             catch (Exception x)
             {
-                Odgovor o = new Odgovor();
-                return o;
+                return Greska(x);
             }
         }
 
@@ -293,8 +289,7 @@ namespace Klijent
             }
             catch (Exception x)
             {
-                Odgovor o = new Odgovor();
-                return o;
+                return Greska(x);
             }
         }
 
@@ -312,8 +307,7 @@ namespace Klijent
             }
             catch (Exception x)
             {
-                Odgovor o = new Odgovor();
-                return o;
+                return Greska(x);
             }
         }
 
@@ -331,8 +325,7 @@ namespace Klijent
             }
             catch (Exception x)
             {
-                Odgovor o = new Odgovor();
-                return o;
+                return Greska(x);
             }
         }
 
@@ -355,8 +348,7 @@ namespace Klijent
             }
             catch (Exception x)
             {
-                Odgovor o = new Odgovor();
-                return o;
+                return Greska(x);
             }
         }
 
@@ -376,8 +368,7 @@ namespace Klijent
             }
             catch (Exception x)
             {
-                Odgovor o = new Odgovor();
-                return o;
+                return Greska(x);
             }
         }
     }

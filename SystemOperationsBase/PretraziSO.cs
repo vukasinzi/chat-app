@@ -11,9 +11,9 @@ namespace SO
 {
     public class PretraziSO : SystemOperationsBase
     {
-        private string msgText;
+        private string msgText = "";
         int primalac;
-        public string prinm;
+        public string prinm = "";
         Korisnik k = new Korisnik();
         public Odgovor o = new Odgovor();
         public PretraziSO(string msgText)

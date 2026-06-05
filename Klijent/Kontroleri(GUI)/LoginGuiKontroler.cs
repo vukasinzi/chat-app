@@ -43,8 +43,12 @@ namespace Klijent.Kontroleri_GUI_
                 }
                 else
                 {
+                    if (o.Rezultat is not Korisnik l)
+                    {
+                        await DialogService.ShowMessageAsync("Login nije vratio korisnika.");
+                        return false;
+                    }
                     await DialogService.ShowMessageAsync("Uspešno logovanje. Dobro došli, " + k.Korisnicko_ime + ".");
-                    Korisnik l = (Korisnik)o.Rezultat;
                     MainWindow window = new MainWindow(l);
                     if (Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
                         desktop.MainWindow = window;
@@ -57,6 +61,7 @@ namespace Klijent.Kontroleri_GUI_
             catch (Exception x)
             {
                 Debug.WriteLine(x.Message);
+                await DialogService.ShowMessageAsync(x.Message);
             }
             return false;
         }
@@ -93,6 +98,7 @@ namespace Klijent.Kontroleri_GUI_
             catch (Exception x)
             {
                 Debug.WriteLine(x.Message);
+                await DialogService.ShowMessageAsync(x.Message);
             }
                 return false;
         }

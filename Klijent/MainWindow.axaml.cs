@@ -198,9 +198,6 @@ public partial class MainWindow : Window
         _primalac = kontakt;
 
         var poruke = await MainGuiKontroler.Instance.UcitajSvePoruke(_primalac, _korisnik);
-        if (poruke is null)
-            return;
-
         foreach (var poruka in poruke)
             DodajPoruku(poruka);
     }

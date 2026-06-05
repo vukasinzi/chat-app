@@ -54,8 +54,6 @@ namespace Zajednicki.Domen
                 pop1.datum = (DateTime)dr["datum"];
                 popara.Add(pop1);
             }
-            if (popara.Count == 0)
-                return null;
             return popara;
             
         }

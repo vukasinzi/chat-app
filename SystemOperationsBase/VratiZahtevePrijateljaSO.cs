@@ -12,9 +12,9 @@ namespace SO
     {
         int id;
         public List<Prijateljstvo> listaPrijatelja = new List<Prijateljstvo>();
-        public VratiZahtevePrijateljaSO(int?id)
+        public VratiZahtevePrijateljaSO(int id)
         {
-            this.id = (int)id;
+            this.id = id;
         }
         protected override async Task ExecuteConcreteOperationAsync(CancellationToken token = default)
         {

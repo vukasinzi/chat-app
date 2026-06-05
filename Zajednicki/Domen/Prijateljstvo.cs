@@ -81,8 +81,6 @@ namespace Zajednicki.Domen
                 p.status = (string)dr["status"];
                 lista.Add(p);
             }
-            if (lista.Count == 0)
-                return null;
             return lista;
         }
 

@@ -90,7 +90,10 @@ namespace Server
             {
                 cts?.Cancel();
             }
-            catch { }
+            catch (Exception x)
+            {
+                Debug.WriteLine(x.Message);
+            }
             ConcurrentDictionary<string, ClientHandler> copy = new ConcurrentDictionary<string, ClientHandler>(online);
             foreach (var c in copy)
             {
@@ -98,11 +101,15 @@ namespace Server
                 {
                     c.Value.socket.Close();
                 }
-                catch { }
+                catch (Exception x)
+                {
+                    Debug.WriteLine(x.Message);
+                }
             }
             lock (_lock)
                 online.Clear();
             serverskiSocket.Close();
+            pushSocket.Close();
             online = new ConcurrentDictionary<string, ClientHandler>();
         }
 

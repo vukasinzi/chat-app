@@ -53,8 +53,6 @@ namespace Klijent.Domen
                 kok1.Korisnicko_ime = (string)dr["korisnicko_ime"];
                 koki.Add(kok1);
             }
-            if (koki.Count == 0)
-                return null;
             return koki;           
         }
 

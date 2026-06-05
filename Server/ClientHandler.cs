@@ -53,7 +53,10 @@ namespace Server
                     if (socket.Connected)
                         socket.Close();
                 }
-                catch { }
+                catch (Exception x)
+                {
+                    Debug.WriteLine(x.Message);
+                }
                 server.RemoveClient(this,currentUser);
                 
             }
@@ -102,10 +105,24 @@ namespace Server
                     case Operacija.Pretraga2:
                         int? id = serializer.ReadTypeStruct<int>((JsonElement)z.Objekat);
                         if (id != null)
-                            o.Rezultat = await Kontroler.Instance.Pretrazi(id.Value, token);
+                        {
+                            string username = await Kontroler.Instance.Pretrazi(id.Value, token);
+                            if (!string.IsNullOrWhiteSpace(username))
+                            {
+                                o.Rezultat = username;
+                                o.Uspesno = true;
+                            }
+                            else
+                            {
+                                o.Poruka = "Korisnik nije pronađen.";
+                            }
+                        }
+                        else
+                            o.Poruka = "Neispravan id za pretragu.";
                         break;
                     case Operacija.Prijatelji:
                         o.Rezultat = await Kontroler.Instance.Prijatelji(serializer.ReadType<Korisnik>((JsonElement)z.Objekat), token);
+                        o.Uspesno = true;
                         break;
                     case Operacija.Posalji:
                         {
@@ -140,7 +157,14 @@ namespace Server
                         }
                         break;
                     case Operacija.VratiZahtevePrijatelja:
-                        o.Rezultat = await Kontroler.Instance.VratiZahtevePrijatelja(serializer.ReadTypeStruct<int>((JsonElement)z.Objekat), token);
+                        int? korisnikId = serializer.ReadTypeStruct<int>((JsonElement)z.Objekat);
+                        if (korisnikId != null)
+                        {
+                            o.Rezultat = await Kontroler.Instance.VratiZahtevePrijatelja(korisnikId.Value, token);
+                            o.Uspesno = true;
+                        }
+                        else
+                            o.Poruka = "Neispravan id korisnika.";
                         break;
                     case Operacija.PrihvatiPrijatelja:
                         {
@@ -152,8 +176,7 @@ namespace Server
                                 string posiljalacUsername = await Kontroler.Instance.Pretrazi(_p.korisnik1_id, token);
                                 string primalacUsername = await Kontroler.Instance.Pretrazi(_p.korisnik2_id, token);
                                 Odgovor _o = await Kontroler.Instance.Pretrazi(primalacUsername, token);
-                                Korisnik _k = (Korisnik)_o.Rezultat;
-                                if (server.online.TryGetValue(posiljalacUsername, out var client))
+                                if (_o.Rezultat is Korisnik _k && server.online.TryGetValue(posiljalacUsername, out var client))
                                 {
                                     Zahtev _z = new Zahtev();
                                     _z.Operacija = Operacija.PrihvatiPrijatelja;
@@ -161,12 +184,11 @@ namespace Server
                                     await client.PushAsync(_z, token);
                                 }
                                 _o = await Kontroler.Instance.Pretrazi(posiljalacUsername, token);
-                                _k = (Korisnik)_o.Rezultat;
-                                if (server.online.TryGetValue(primalacUsername, out var client1))
+                                if (_o.Rezultat is Korisnik _k1 && server.online.TryGetValue(primalacUsername, out var client1))
                                 {
                                     Zahtev _z = new Zahtev();
                                     _z.Operacija = Operacija.PrihvatiPrijatelja;
-                                    _z.Objekat = _k;
+                                    _z.Objekat = _k1;
                                     await client1.PushAsync(_z, token);
                                 }
                             }
@@ -192,39 +214,49 @@ namespace Server
                         break;
                     case Operacija.UcitajSvePoruke:
                         o.Rezultat = await Kontroler.Instance.UcitajSvePoruke(serializer.ReadType<Tuple<int, int>>((JsonElement)z.Objekat), token);
+                        o.Uspesno = true;
                         break;
                     case Operacija.ObrisiPrijateljstvo:
                         {
                             o.Uspesno = await Kontroler.Instance.ObrisiPrijateljstvo(serializer.ReadType<Prijateljstvo>((JsonElement)z.Objekat), token);
                             Prijateljstvo _p = serializer.ReadType<Prijateljstvo>((JsonElement)z.Objekat);
 
-                            string posiljalacUsername = await Kontroler.Instance.Pretrazi(_p.korisnik1_id, token);
-                            string primalacUsername = await Kontroler.Instance.Pretrazi(_p.korisnik2_id, token);
-                            Odgovor _o = await Kontroler.Instance.Pretrazi(primalacUsername, token);
-                            Korisnik _k = (Korisnik)_o.Rezultat;
-                            if (server.online.TryGetValue(posiljalacUsername, out var client))
+                            if (o.Uspesno)
                             {
-                                Zahtev _z = new Zahtev();
-                                _z.Operacija = Operacija.ObrisiPrijateljstvo;
-                                _z.Objekat = _k;
-                                await client.PushAsync(_z, token);
-                            }
-                            _o = await Kontroler.Instance.Pretrazi(posiljalacUsername, token);
-                            _k = (Korisnik)_o.Rezultat;
-                            if (server.online.TryGetValue(primalacUsername, out var client1))
-                            {
-                                Zahtev _z = new Zahtev();
-                                _z.Operacija = Operacija.ObrisiPrijateljstvo;
-                                _z.Objekat = _k;
-                                await client1.PushAsync(_z, token);
+                                string posiljalacUsername = await Kontroler.Instance.Pretrazi(_p.korisnik1_id, token);
+                                string primalacUsername = await Kontroler.Instance.Pretrazi(_p.korisnik2_id, token);
+                                Odgovor _o = await Kontroler.Instance.Pretrazi(primalacUsername, token);
+                                if (_o.Rezultat is Korisnik _k && server.online.TryGetValue(posiljalacUsername, out var client))
+                                {
+                                    Zahtev _z = new Zahtev();
+                                    _z.Operacija = Operacija.ObrisiPrijateljstvo;
+                                    _z.Objekat = _k;
+                                    await client.PushAsync(_z, token);
+                                }
+                                _o = await Kontroler.Instance.Pretrazi(posiljalacUsername, token);
+                                if (_o.Rezultat is Korisnik _k1 && server.online.TryGetValue(primalacUsername, out var client1))
+                                {
+                                    Zahtev _z = new Zahtev();
+                                    _z.Operacija = Operacija.ObrisiPrijateljstvo;
+                                    _z.Objekat = _k1;
+                                    await client1.PushAsync(_z, token);
+                                }
                             }
                         }
                         break;
+                    default:
+                        o.Poruka = "Nepoznata operacija.";
+                        break;
                 }
-                if (o.Poruka == "logovan")
-                    throw new Exception("login exception");
+                if (string.IsNullOrWhiteSpace(o.Poruka) && !o.Uspesno && o.Rezultat == null)
+                    o.Poruka = "Operacija nije uspela.";
             }
-            catch  { }
+            catch (Exception x)
+            {
+                Debug.WriteLine(x.Message);
+                o.Uspesno = false;
+                o.Poruka = x.Message;
+            }
             return o;
         }
     }

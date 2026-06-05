@@ -30,17 +30,17 @@ namespace Klijent.Kontroleri_GUI_
 
                 await Komunikacija.Instance.ConnectAsync();
                 Odgovor o = await Komunikacija.Instance.Pretrazi(msgtext);
-                if (o == null || !o.Uspesno)
+                if (!o.Uspesno || o.Rezultat is not Korisnik l)
                 {
                     await DialogService.ShowMessageAsync("Ne postoji korisnik sa tim korisnickim imenom.");
                     return null;
                 }
 
-                Korisnik l = (Korisnik)o.Rezultat;
                 return l;
             }
-            catch
+            catch(Exception x)
             {
+                await DialogService.ShowMessageAsync(x.Message);
                 return null;
             }
         }
@@ -51,12 +51,13 @@ namespace Klijent.Kontroleri_GUI_
             {
                 await Komunikacija.Instance.ConnectAsync();
                 Odgovor o = await Komunikacija.Instance.Pretrazi(id);
-                if (o == null)
+                if (!o.Uspesno || o.Rezultat is not string username)
                     return null;
-                return (string)o.Rezultat;
+                return username;
             }
-            catch
+            catch(Exception x)
             {
+                await DialogService.ShowMessageAsync(x.Message);
                 return null;
             }
         }
@@ -76,8 +77,9 @@ namespace Klijent.Kontroleri_GUI_
                         Kontakti.Add(u);
                 }
             }
-            catch
+            catch(Exception x)
             {
+                await DialogService.ShowMessageAsync(x.Message);
                 return;
             }
         }
@@ -95,8 +97,9 @@ namespace Klijent.Kontroleri_GUI_
                 }
                 return true;
             }
-            catch
+            catch(Exception x)
             {
+                await DialogService.ShowMessageAsync(x.Message);
                 return false;
             }
         }
@@ -112,8 +115,9 @@ namespace Klijent.Kontroleri_GUI_
 
                 return false;
             }
-            catch
+            catch(Exception x)
             {
+                await DialogService.ShowMessageAsync(x.Message);
                 return false;
             }
         }
@@ -145,8 +149,9 @@ namespace Klijent.Kontroleri_GUI_
 
 
             }
-            catch
+            catch(Exception x)
             {
+                await DialogService.ShowMessageAsync(x.Message);
                 return;
             }
         }
@@ -163,8 +168,9 @@ namespace Klijent.Kontroleri_GUI_
                 return false;
 
             }
-            catch
+            catch(Exception x)
             {
+                await DialogService.ShowMessageAsync(x.Message);
                 return false;
             }
         }
@@ -181,13 +187,14 @@ namespace Klijent.Kontroleri_GUI_
                 return false;
 
             }
-            catch
+            catch(Exception x)
             {
+                await DialogService.ShowMessageAsync(x.Message);
                 return false;
             }
         }
 
-        internal async Task<List<Poruka>?> UcitajSvePoruke(Korisnik primalac, Korisnik k)
+        internal async Task<List<Poruka>> UcitajSvePoruke(Korisnik primalac, Korisnik k)
         {
             try
             {
@@ -201,9 +208,10 @@ namespace Klijent.Kontroleri_GUI_
                 return new List<Poruka>();
 
             }
-            catch
+            catch(Exception x)
             {
-                return null;
+                await DialogService.ShowMessageAsync(x.Message);
+                return new List<Poruka>();
             }
         }
 
@@ -217,8 +225,9 @@ namespace Klijent.Kontroleri_GUI_
                 return o.Uspesno;
 
             }
-            catch
+            catch(Exception x)
             {
+                await DialogService.ShowMessageAsync(x.Message);
                 return false;
             }
         }

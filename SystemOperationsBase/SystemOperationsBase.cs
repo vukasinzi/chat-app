@@ -21,10 +21,10 @@ namespace SO
                 await ExecuteConcreteOperationAsync(token);
                 await broker.CommitAsync(token);
             }
-            catch(Exception x)
+            catch
             {
                 await broker.RollbackAsync();
-                Console.WriteLine(x.Message);
+                throw;
             }
             finally
             {

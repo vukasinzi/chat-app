@@ -82,7 +82,7 @@ namespace Server
             return ((RegistrujSeSO)rog).o;
         }
 
-        internal async Task<List<Prijateljstvo>> VratiZahtevePrijatelja(int? id, CancellationToken token = default)
+        internal async Task<List<Prijateljstvo>> VratiZahtevePrijatelja(int id, CancellationToken token = default)
         {
             SystemOperationsBase vog = new VratiZahtevePrijateljaSO(id);
             await vog.ExecuteAsync(token);
