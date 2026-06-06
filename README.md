@@ -1,31 +1,47 @@
-A simple real-time chat application consisting of a server and multiple clients. Each client is a WPF-based Windows desktop application that connects to the server over TCP sockets to send and receive chat messages asynchronously. Communication is handled using low-level sockets, enabling real-time message delivery while keeping the UI responsive.
+# Chat App
 
-The client interface displays the message history and provides an input field with a Send button for composing messages. Incoming messages are received and rendered in real time without polling or refresh actions.
+This is a simple chat application made in C# using .NET, Avalonia UI, TCP sockets, and SQL Server.
 
-Key Features
+The project has two main parts: a server and a desktop client. The client connects to the server, and users can register, log in, add friends, and send messages to each other.
 
-Multi-Client Chat
-Multiple clients can be connected at the same time and exchange messages in real time.
+Features
 
-WPF User Interface
-The client is built using Windows Presentation Foundation (WPF) to provide a native Windows desktop experience.
+    User registration and login
+    Searching users by username
+    Sending friend requests
+    Accepting or rejecting friend requests
+    Removing friends
+    Sending and receiving chat messages
+    Loading previous messages from the database
+    Real-time updates for messages and friend requests
 
-Asynchronous Communication
-All networking operations are asynchronous, ensuring that sending and receiving messages never block the UI thread.
+Technologies Used
 
-Real-Time Message Delivery
-Messages are delivered instantly as they are received by the server, without manual refresh or background polling.
+    C#
+    .NET 10
+    Avalonia UI
+    SQL Server
+    TCP sockets
+    JSON serialization
 
-Low-Level TCP Communication
-The application uses raw TCP sockets for reliable client–server communication.
+Project Structure
 
-Technology Stack
+    Klijent/ - desktop client application
+    Server/ - server application
+    Zajednicki/ - shared classes used by both client and server
+    BrokerBazePodataka/ - database broker logic
+    SystemOperationsBase/ - system operations, such as login, registration, sending messages, etc.
+    baza.sql - SQL script for creating the database
+    docker-compose.yaml - SQL Server Docker setup
 
-C# (.NET)
-The application is implemented in C# using the .NET platform.
+How It Works
 
-WPF
-Windows Presentation Foundation is used for the desktop client UI.
+The client communicates with the server using TCP sockets.
 
-TCP Sockets
-Communication between clients and the server is handled using low-level TCP sockets.
+One socket is used for normal requests, such as login, registration, searching users, and sending messages. Another socket is used for push notifications, so the server can send new messages and friend request updates to online users immediately.
+
+Data such as users, friendships, and messages is stored in SQL Server.
+
+Notes
+
+This project is mainly made for learning purposes. Passwords are currently stored as plain text, so the application should not be available to the public.
