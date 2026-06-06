@@ -1,4 +1,5 @@
 ﻿using Klijent.Domen;
+using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -29,11 +30,27 @@ namespace Klijent
         private Socket pushSocket;
         private JsonNetworkSerializer pushSerializer;
         private CancellationTokenSource pushCts;
+        private readonly string ip;
+        private readonly int port;
+        private readonly int pushPort;
         public event Action<Poruka> PorukaPrimljena;
         public event Action<PrijateljstvoView> PrijateljaDodaj;
         public event Action<Korisnik> PrijateljaPrihvati;
         public event Action<Korisnik> PrijateljaObrisi;
         public event Action<PrijateljstvoView> PrijateljaOdbij;
+
+        private Komunikacija()
+        {
+            var config = new ConfigurationBuilder()
+                .SetBasePath(AppContext.BaseDirectory)
+                .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+                .Build();
+
+            ip = config.GetRequiredSection("ServerSettings").GetValue<string>("Ip");
+    
+            port = config.GetRequiredSection("ServerSettings").GetValue<int>("Port");
+            pushPort = config.GetRequiredSection("ServerSettings").GetValue<int>("PushPort");
+        }
 
         bool isConnected()
         {
@@ -63,7 +80,7 @@ namespace Klijent
                 if (!isConnected())
                 {
                     socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-                    await socket.ConnectAsync("127.0.0.1", 9999, token);
+                    await socket.ConnectAsync(ip, port, token);
                     serializer = new JsonNetworkSerializer(socket);
                 }
             }
@@ -102,7 +119,7 @@ namespace Klijent
             if (pushSocket != null && pushSocket.Connected) return;
 
             pushSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-            await pushSocket.ConnectAsync("127.0.0.1", 10000, token);
+            await pushSocket.ConnectAsync(ip, pushPort, token);
             pushSerializer = new JsonNetworkSerializer(pushSocket);
             await pushSerializer.SendAsync(v, token);
 
