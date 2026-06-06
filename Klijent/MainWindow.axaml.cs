@@ -7,6 +7,7 @@ using Avalonia.Media;
 using Avalonia.Threading;
 using Klijent.Domen;
 using Klijent.Kontroleri_GUI_;
+using Zajednicki;
 using Zajednicki.Domen;
 
 namespace Klijent;
@@ -22,28 +23,65 @@ public partial class MainWindow : Window
         Opened += Window_Opened;
     }
 
-    public MainWindow(Korisnik korisnik)
-        : this()
+    public MainWindow(Korisnik korisnik) : this()
     {
         _korisnik = korisnik;
         DataContext = MainGuiKontroler.Instance;
 
-        Komunikacija.Instance.PorukaPrimljena += OnPorukaPrimljena;
-        Komunikacija.Instance.PrijateljaDodaj += OnDodajPrijatelja;
-        Komunikacija.Instance.PrijateljaPrihvati += OnPrijateljaPrihvati;
-        Komunikacija.Instance.PrijateljaObrisi += OnPrijateljaObrisi;
-        Komunikacija.Instance.PrijateljaOdbij += OnPrijateljaOdbij;
+        Komunikacija.Instance.PushPrimljen += OnPushPrimljen;
 
         Closed += (_, _) =>
         {
-            Komunikacija.Instance.PorukaPrimljena -= OnPorukaPrimljena;
-            Komunikacija.Instance.PrijateljaDodaj -= OnDodajPrijatelja;
-            Komunikacija.Instance.PrijateljaPrihvati -= OnPrijateljaPrihvati;
-            Komunikacija.Instance.PrijateljaObrisi -= OnPrijateljaObrisi;
-            Komunikacija.Instance.PrijateljaOdbij -= OnPrijateljaOdbij;
+            Komunikacija.Instance.PushPrimljen -= OnPushPrimljen;
         };
 
         korisnikText.Text = $"korisnik: {korisnik.Korisnicko_ime}";
+    }
+
+    private void OnPushPrimljen(Zahtev zahtev)
+    {
+        switch (zahtev.Operacija)
+        {
+            case Operacija.Posalji:
+                if (zahtev.Objekat is Poruka poruka)
+                {
+                    OnPorukaPrimljena(poruka);
+                }
+
+                break;
+
+            case Operacija.DodajPrijatelja:
+                if (zahtev.Objekat is PrijateljstvoView zahtevZaPrijateljstvo)
+                {
+                    OnDodajPrijatelja(zahtevZaPrijateljstvo);
+                }
+
+                break;
+
+            case Operacija.PrihvatiPrijatelja:
+                if (zahtev.Objekat is Korisnik prihvaceniKorisnik)
+                {
+                    OnPrijateljaPrihvati(prihvaceniKorisnik);
+                }
+
+                break;
+
+            case Operacija.ObrisiPrijateljstvo:
+                if (zahtev.Objekat is Korisnik obrisaniKorisnik)
+                {
+                    OnPrijateljaObrisi(obrisaniKorisnik);
+                }
+
+                break;
+
+            case Operacija.OdbijPrijatelja:
+                if (zahtev.Objekat is PrijateljstvoView odbijenoPrijateljstvo)
+                {
+                    OnPrijateljaOdbij(odbijenoPrijateljstvo);
+                }
+
+                break;
+        }
     }
 
     private void OnPorukaPrimljena(Poruka poruka)
@@ -53,7 +91,17 @@ public partial class MainWindow : Window
             if (_korisnik is null)
                 return;
 
-            int drugiId = poruka.posiljalac_id == _korisnik.Id ? poruka.primalac_id : poruka.posiljalac_id;
+            int drugiId;
+
+            if (poruka.posiljalac_id == _korisnik.Id)
+            {
+                drugiId = poruka.primalac_id;
+            }
+            else
+            {
+                drugiId = poruka.posiljalac_id;
+            }
+
             if (Kontakti.SelectedItem is Korisnik izabrani && izabrani.Id == drugiId)
                 DodajPoruku(poruka);
         });
@@ -95,16 +143,22 @@ public partial class MainWindow : Window
             return;
 
         bool incoming = poruka.posiljalac_id != _korisnik.Id;
+        string backgroundColor = "#2b2d2e";
+        HorizontalAlignment horizontalAlignment = HorizontalAlignment.Right;
+
+        if (incoming)
+        {
+            backgroundColor = "#202223";
+            horizontalAlignment = HorizontalAlignment.Left;
+        }
 
         var bubble = new Border
         {
-            Background = incoming
-                ? new SolidColorBrush(Color.Parse("#202223"))
-                : new SolidColorBrush(Color.Parse("#2b2d2e")),
+            Background = new SolidColorBrush(Color.Parse(backgroundColor)),
             CornerRadius = new CornerRadius(12),
             Padding = new Thickness(10, 6),
             Margin = new Thickness(4, 2),
-            HorizontalAlignment = incoming ? HorizontalAlignment.Left : HorizontalAlignment.Right,
+            HorizontalAlignment = horizontalAlignment,
             MaxWidth = 420
         };
 
@@ -177,7 +231,6 @@ public partial class MainWindow : Window
     {
         if (_korisnik is null)
             return;
-
         try
         {
             await MainGuiKontroler.Instance.VratiZahtevePrijatelja(_korisnik.Id);

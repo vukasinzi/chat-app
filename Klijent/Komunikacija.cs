@@ -33,11 +33,7 @@ namespace Klijent
         private readonly string ip;
         private readonly int port;
         private readonly int pushPort;
-        public event Action<Poruka> PorukaPrimljena;
-        public event Action<PrijateljstvoView> PrijateljaDodaj;
-        public event Action<Korisnik> PrijateljaPrihvati;
-        public event Action<Korisnik> PrijateljaObrisi;
-        public event Action<PrijateljstvoView> PrijateljaOdbij;
+        public event Action<Zahtev>? PushPrimljen;
 
         private Komunikacija()
         {
@@ -46,7 +42,8 @@ namespace Klijent
                 .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
                 .Build();
 
-            ip = config.GetRequiredSection("ServerSettings").GetValue<string>("Ip");
+            ip = config.GetRequiredSection("ServerSettings").GetValue<string>("Ip")
+                ?? throw new InvalidOperationException("ServerSettings:Ip nije podesen.");
     
             port = config.GetRequiredSection("ServerSettings").GetValue<int>("Port");
             pushPort = config.GetRequiredSection("ServerSettings").GetValue<int>("PushPort");
@@ -132,26 +129,38 @@ namespace Klijent
             while(!token.IsCancellationRequested && pushSocket != null&&  pushSocket.Connected)
             {
                 Zahtev z = await pushSerializer.ReceiveAsync<Zahtev>(token);
-                switch (z.Operacija)
-                {
-                    case Operacija.Posalji:
-                        PorukaPrimljena.Invoke(serializer.ReadType<Poruka>((JsonElement)z.Objekat));
-                        break;
-                    case Operacija.DodajPrijatelja:
-                        PrijateljaDodaj.Invoke(serializer.ReadType<PrijateljstvoView>((JsonElement)z.Objekat));
-                        break;
-                    case Operacija.PrihvatiPrijatelja:
-                        PrijateljaPrihvati.Invoke(serializer.ReadType<Korisnik>((JsonElement)z.Objekat));
-                        break;
-                    case Operacija.ObrisiPrijateljstvo:
-                        PrijateljaObrisi.Invoke(serializer.ReadType<Korisnik>((JsonElement)z.Objekat));
-                        break;
-                    case Operacija.OdbijPrijatelja:
-                        PrijateljaOdbij.Invoke(serializer.ReadType<PrijateljstvoView>((JsonElement)z.Objekat));
-                        break;
+                DeserijalizujPushObjekat(z);
+                PushPrimljen?.Invoke(z);
 
-                }
+            }
+        }
 
+        private void DeserijalizujPushObjekat(Zahtev z)
+        {
+            if (z.Objekat is not JsonElement element)
+                return;
+
+            switch (z.Operacija)
+            {
+                case Operacija.Posalji:
+                    z.Objekat = pushSerializer.ReadType<Poruka>(element);
+                    break;
+
+                case Operacija.DodajPrijatelja:
+                    z.Objekat = pushSerializer.ReadType<PrijateljstvoView>(element);
+                    break;
+
+                case Operacija.PrihvatiPrijatelja:
+                    z.Objekat = pushSerializer.ReadType<Korisnik>(element);
+                    break;
+
+                case Operacija.ObrisiPrijateljstvo:
+                    z.Objekat = pushSerializer.ReadType<Korisnik>(element);
+                    break;
+
+                case Operacija.OdbijPrijatelja:
+                    z.Objekat = pushSerializer.ReadType<PrijateljstvoView>(element);
+                    break;
             }
         }
 
