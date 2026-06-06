@@ -26,13 +26,18 @@ public partial class MainWindow : Window
     public MainWindow(Korisnik korisnik) : this()
     {
         _korisnik = korisnik;
-        DataContext = MainGuiKontroler.Instance;
+        var kontroler = MainGuiKontroler.Instance;
+        DataContext = kontroler;
 
         Komunikacija.Instance.PushPrimljen += OnPushPrimljen;
+        kontroler.PorukaPrimljena += DodajPoruku;
+        kontroler.KontaktUklonjen += OcistiChat;
 
         Closed += (_, _) =>
         {
             Komunikacija.Instance.PushPrimljen -= OnPushPrimljen;
+            kontroler.PorukaPrimljena -= DodajPoruku;
+            kontroler.KontaktUklonjen -= OcistiChat;
         };
 
         korisnikText.Text = $"korisnik: {korisnik.Korisnicko_ime}";
@@ -40,101 +45,13 @@ public partial class MainWindow : Window
 
     private void OnPushPrimljen(Zahtev zahtev)
     {
-        switch (zahtev.Operacija)
-        {
-            case Operacija.Posalji:
-                if (zahtev.Objekat is Poruka poruka)
-                {
-                    OnPorukaPrimljena(poruka);
-                }
-
-                break;
-
-            case Operacija.DodajPrijatelja:
-                if (zahtev.Objekat is PrijateljstvoView zahtevZaPrijateljstvo)
-                {
-                    OnDodajPrijatelja(zahtevZaPrijateljstvo);
-                }
-
-                break;
-
-            case Operacija.PrihvatiPrijatelja:
-                if (zahtev.Objekat is Korisnik prihvaceniKorisnik)
-                {
-                    OnPrijateljaPrihvati(prihvaceniKorisnik);
-                }
-
-                break;
-
-            case Operacija.ObrisiPrijateljstvo:
-                if (zahtev.Objekat is Korisnik obrisaniKorisnik)
-                {
-                    OnPrijateljaObrisi(obrisaniKorisnik);
-                }
-
-                break;
-
-            case Operacija.OdbijPrijatelja:
-                if (zahtev.Objekat is PrijateljstvoView odbijenoPrijateljstvo)
-                {
-                    OnPrijateljaOdbij(odbijenoPrijateljstvo);
-                }
-
-                break;
-        }
-    }
-
-    private void OnPorukaPrimljena(Poruka poruka)
-    {
         Dispatcher.UIThread.Post(() =>
         {
             if (_korisnik is null)
                 return;
 
-            int drugiId;
-
-            if (poruka.posiljalac_id == _korisnik.Id)
-            {
-                drugiId = poruka.primalac_id;
-            }
-            else
-            {
-                drugiId = poruka.posiljalac_id;
-            }
-
-            if (Kontakti.SelectedItem is Korisnik izabrani && izabrani.Id == drugiId)
-                DodajPoruku(poruka);
+            MainGuiKontroler.Instance.ObradiPush(zahtev, _korisnik, _primalac);
         });
-    }
-
-    private void OnDodajPrijatelja(PrijateljstvoView prijateljstvo)
-    {
-        Dispatcher.UIThread.Post(() => MainGuiKontroler.Instance.Prijateljstva.Add(prijateljstvo));
-    }
-
-    private void OnPrijateljaPrihvati(Korisnik korisnik)
-    {
-        Dispatcher.UIThread.Post(() => MainGuiKontroler.Instance.Kontakti.Add(korisnik));
-    }
-
-    private void OnPrijateljaObrisi(Korisnik korisnik)
-    {
-        Dispatcher.UIThread.Post(() =>
-        {
-            RemoveKontaktById(korisnik.Id);
-
-            if (_primalac?.Id == korisnik.Id)
-            {
-                _primalac = null;
-                user.Text = string.Empty;
-                PorukePanel.Children.Clear();
-            }
-        });
-    }
-
-    private void OnPrijateljaOdbij(PrijateljstvoView prijateljstvo)
-    {
-        Dispatcher.UIThread.Post(() => RemovePrijateljstvo(prijateljstvo));
     }
 
     private void DodajPoruku(Poruka poruka)
@@ -171,6 +88,13 @@ public partial class MainWindow : Window
 
         PorukePanel.Children.Add(bubble);
         Dispatcher.UIThread.Post(() => ChatScroll.ScrollToEnd(), DispatcherPriority.Background);
+    }
+
+    private void OcistiChat(Korisnik korisnik)
+    {
+        _primalac = null;
+        user.Text = string.Empty;
+        PorukePanel.Children.Clear();
     }
 
     private async void Send_Click(object? sender, RoutedEventArgs e)
@@ -264,13 +188,11 @@ public partial class MainWindow : Window
         if (!ok)
             return;
 
-        RemoveKontaktById(korisnik.Id);
+        MainGuiKontroler.Instance.UkloniKontakt(korisnik.Id);
 
         if (_primalac?.Id == korisnik.Id)
         {
-            _primalac = null;
-            user.Text = string.Empty;
-            PorukePanel.Children.Clear();
+            OcistiChat(korisnik);
         }
     }
 
@@ -296,7 +218,7 @@ public partial class MainWindow : Window
 
         bool uspesno = await MainGuiKontroler.Instance.OdbijPrijatelja(prijateljstvo.Link);
         if (uspesno)
-            RemovePrijateljstvo(prijateljstvo);
+            MainGuiKontroler.Instance.UkloniZahtev(prijateljstvo);
     }
 
     private async void Accept_Click(object? sender, RoutedEventArgs e)
@@ -308,7 +230,7 @@ public partial class MainWindow : Window
         if (!uspesno)
             return;
 
-        RemovePrijateljstvo(prijateljstvo);
+        MainGuiKontroler.Instance.UkloniZahtev(prijateljstvo);
     }
 
     private void PrijateljiBtn_Click(object? sender, RoutedEventArgs e)
@@ -321,22 +243,5 @@ public partial class MainWindow : Window
     {
         await UcitajPrijatelje();
         await UcitajZahtevePrijateljstva();
-    }
-
-    private void RemoveKontaktById(int id)
-    {
-        var kontakt = MainGuiKontroler.Instance.Kontakti.FirstOrDefault(x => x.Id == id);
-        if (kontakt is not null)
-            MainGuiKontroler.Instance.Kontakti.Remove(kontakt);
-    }
-
-    private void RemovePrijateljstvo(PrijateljstvoView prijateljstvo)
-    {
-        var stavka = MainGuiKontroler.Instance.Prijateljstva.FirstOrDefault(x =>
-            x.Link.korisnik1_id == prijateljstvo.Link.korisnik1_id &&
-            x.Link.korisnik2_id == prijateljstvo.Link.korisnik2_id);
-
-        if (stavka is not null)
-            MainGuiKontroler.Instance.Prijateljstva.Remove(stavka);
     }
 }

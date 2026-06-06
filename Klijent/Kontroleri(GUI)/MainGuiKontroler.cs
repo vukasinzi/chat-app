@@ -20,6 +20,87 @@ namespace Klijent.Kontroleri_GUI_
         }
         public ObservableCollection<Korisnik> Kontakti { get; set; } = new ObservableCollection<Korisnik>();
         public ObservableCollection<PrijateljstvoView> Prijateljstva { get; set; } = new ObservableCollection<PrijateljstvoView>();
+        public event Action<Poruka>? PorukaPrimljena;
+        public event Action<Korisnik>? KontaktUklonjen;
+
+        internal void ObradiPush(Zahtev zahtev, Korisnik trenutniKorisnik, Korisnik? izabraniKontakt)
+        {
+            switch (zahtev.Operacija)
+            {
+                case Operacija.Posalji:
+                {
+                    if (zahtev.Objekat is Poruka poruka)
+                        ObradiPoruku(poruka, trenutniKorisnik, izabraniKontakt);
+                    break;
+                }
+
+                case Operacija.DodajPrijatelja:
+                {
+                    if (zahtev.Objekat is PrijateljstvoView prijateljstvo)
+                        Prijateljstva.Add(prijateljstvo);
+                    break;
+                }
+
+                case Operacija.PrihvatiPrijatelja:
+                {
+                    if (zahtev.Objekat is Korisnik korisnik)
+                        Kontakti.Add(korisnik);
+                    break;
+                }
+
+                case Operacija.ObrisiPrijateljstvo:
+                {
+                    if (zahtev.Objekat is Korisnik korisnik)
+                        ObrisiKontakt(korisnik, izabraniKontakt);
+                    break;
+                }
+
+                case Operacija.OdbijPrijatelja:
+                {
+                    if (zahtev.Objekat is PrijateljstvoView prijateljstvo)
+                        UkloniZahtev(prijateljstvo);
+                    break;
+                }
+            }
+        }
+
+        private void ObradiPoruku(Poruka poruka, Korisnik trenutniKorisnik, Korisnik? izabraniKontakt)
+        {
+            if (izabraniKontakt is null)
+                return;
+
+            int drugiId = poruka.posiljalac_id == trenutniKorisnik.Id
+                ? poruka.primalac_id
+                : poruka.posiljalac_id;
+
+            if (izabraniKontakt.Id == drugiId)
+                PorukaPrimljena?.Invoke(poruka);
+        }
+
+        private void ObrisiKontakt(Korisnik korisnik, Korisnik? izabraniKontakt)
+        {
+            UkloniKontakt(korisnik.Id);
+
+            if (izabraniKontakt?.Id == korisnik.Id)
+                KontaktUklonjen?.Invoke(korisnik);
+        }
+
+        internal void UkloniKontakt(int id)
+        {
+            var kontakt = Kontakti.FirstOrDefault(x => x.Id == id);
+            if (kontakt is not null)
+                Kontakti.Remove(kontakt);
+        }
+
+        internal void UkloniZahtev(PrijateljstvoView prijateljstvo)
+        {
+            var zahtev = Prijateljstva.FirstOrDefault(x =>
+                x.Link.korisnik1_id == prijateljstvo.Link.korisnik1_id &&
+                x.Link.korisnik2_id == prijateljstvo.Link.korisnik2_id);
+
+            if (zahtev is not null)
+                Prijateljstva.Remove(zahtev);
+        }
 
         internal async Task<Korisnik?> Pretrazi(string msgtext)
         {
