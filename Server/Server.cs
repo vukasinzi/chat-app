@@ -79,7 +79,7 @@ namespace Server
                 {
                     string username = await ser.ReceiveAsync<string>(token);
                     if (online.TryGetValue(username, out var handler))
-                        handler.babyConstructor(s); 
+                        await handler.babyConstructor(s); 
                     else
                         s.Close(); 
                 }
@@ -135,18 +135,15 @@ namespace Server
                 }
             }
         }
-        internal void AddClient(ClientHandler clienthandler,string currentUser)
+        internal bool AddClient(ClientHandler clienthandler,string currentUser)
         {
             lock(_lock)
             {
-                online.TryAdd(currentUser, clienthandler);
+                return online.TryAdd(currentUser, clienthandler);
             }
         }
 
-        internal bool isOnline(Korisnik l, ClientHandler clientHandler)
-        {
-            return online.ContainsKey(l.Korisnicko_ime.ToString());
-        }
+    
     }
    
 }

@@ -17,6 +17,8 @@ namespace Server
         private JsonNetworkSerializer serializer;
         private Socket? pushSocket;
         private JsonNetworkSerializer? pushSerializer;
+        
+        private SemaphoreSlim pushLock = new SemaphoreSlim(1,1);
 
         public ClientHandler(Socket socket,Server server)
         {
@@ -25,10 +27,19 @@ namespace Server
             this.server = server;
             serializer = new JsonNetworkSerializer(this.socket);
         }
-        internal void babyConstructor(Socket s)
+        internal async Task babyConstructor(Socket s)
         {
+            await pushLock.WaitAsync();
+            try
+            {
             pushSocket = s;
             pushSerializer = new JsonNetworkSerializer(pushSocket);
+
+            }
+            finally
+            {
+                pushLock.Release();
+            }
         }
         public async Task HandleRequests(CancellationToken token)
         {
@@ -62,12 +73,21 @@ namespace Server
             }
         }
 
-        public Task PushAsync(Zahtev z, CancellationToken token = default)
+        public async Task PushAsync(Zahtev z, CancellationToken token = default)
         {
-            if (pushSocket == null || !pushSocket.Connected || pushSerializer == null)
-                return Task.CompletedTask;
+            await pushLock.WaitAsync(token);
+            try
+            {
+                if (pushSocket == null || !pushSocket.Connected || pushSerializer == null)
+                    return;
 
-            return pushSerializer.SendAsync(z, token);
+                await pushSerializer.SendAsync(z, token);
+            }
+            finally
+            {
+                pushLock.Release();
+            }
+            
         }
 
         private async Task<Odgovor> ProcessRequests(Zahtev z, CancellationToken token)
@@ -79,18 +99,24 @@ namespace Server
                 {
                     case Operacija.LogIn:
                         var l = serializer.ReadType<Korisnik>((JsonElement)z.Objekat);
-                        if (server.isOnline(l, this))
-                        {
-                            o.Poruka = "logovan";
-                            break;
-                        }
                         o = await Kontroler.Instance.LogIn(l, token);
+
                         if (o.Uspesno)
                         {
-                            server.AddClient(this, l.Korisnicko_ime.ToString());
-                            currentUser = l.Korisnicko_ime.ToString();
-                           
+                            string username = l.Korisnicko_ime.ToString();
+
+                            if (server.AddClient(this, username))
+                            {
+                                currentUser = username;
+                            }
+                            else
+                            {
+                                o.Uspesno = false;
+                                o.Poruka = "logovan";
+                                o.Rezultat = null;
+                            }
                         }
+
                         
                         break;
                     case Operacija.Dostupnost:

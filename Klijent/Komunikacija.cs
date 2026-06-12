@@ -34,6 +34,9 @@ namespace Klijent
         private readonly int port;
         private readonly int pushPort;
         public event Action<Zahtev>? PushPrimljen;
+        
+        //semafor
+        private SemaphoreSlim requestLock = new SemaphoreSlim(1, 1);
 
         private Komunikacija()
         {
@@ -72,6 +75,8 @@ namespace Klijent
         }
         internal async Task ConnectAsync(CancellationToken token = default)
         {
+
+            await requestLock.WaitAsync(token);
             try
             {
                 if (!isConnected())
@@ -86,11 +91,17 @@ namespace Klijent
                 Debug.WriteLine(x.Message);
                 throw;
             }
+            finally
+            { 
+                requestLock.Release();
+            }
         }
         internal async Task<Odgovor> LogInAsync(Korisnik k, CancellationToken token = default)
         {
+                await requestLock.WaitAsync(token);
             try
             {
+
                 Zahtev z = new Zahtev(Operacija.LogIn,k);
                 await serializer.SendAsync(z, token);
                 Odgovor odgovor = await serializer.ReceiveAsync<Odgovor>(token);
@@ -108,6 +119,10 @@ namespace Klijent
             catch (Exception ex)
             {
                 return Greska(ex);
+            }
+            finally
+            { 
+                requestLock.Release();
             }
         }
 
@@ -166,6 +181,8 @@ namespace Klijent
 
         internal async Task<Odgovor> RegistrujSe(Korisnik k, CancellationToken token = default)
         {
+            await requestLock.WaitAsync(token);
+
             try
             {
                 Zahtev z = new Zahtev(Operacija.RegistrujSe, k);
@@ -182,10 +199,16 @@ namespace Klijent
             {
                 return Greska(x);
             }
+            finally
+            { 
+                requestLock.Release();
+            }
         }
 
         internal async Task<Odgovor> Dostupan(Korisnik k, CancellationToken token = default)
         {
+            await requestLock.WaitAsync(token);
+
             try
             {
                 Zahtev z = new Zahtev(Operacija.Dostupnost, k);
@@ -198,10 +221,16 @@ namespace Klijent
             {
                 return Greska(ex);
             }
+            finally
+            { 
+                requestLock.Release();
+            }
         }
 
         internal async Task<Odgovor> Pretrazi(string text, CancellationToken token = default)
         {
+            await requestLock.WaitAsync(token);
+
             try
             {
                 Zahtev z = new Zahtev(Operacija.Pretraga, text);
@@ -216,9 +245,15 @@ namespace Klijent
             {
                 return Greska(x);
             }
+            finally
+            { 
+                requestLock.Release();
+            }
         }
         internal async Task<Odgovor> Pretrazi(int id, CancellationToken token = default)
         {
+            await requestLock.WaitAsync(token);
+
             try
             {
                 Zahtev z = new Zahtev(Operacija.Pretraga2, id);
@@ -234,10 +269,16 @@ namespace Klijent
             {
                 return Greska(x);
             }
+            finally
+            { 
+                requestLock.Release();
+            }
         }
 
         internal async Task<Odgovor> vratiSvePrijatelje(Korisnik id, CancellationToken token = default)
         {
+            await requestLock.WaitAsync(token);
+
             try
             {
                 Zahtev z = new Zahtev(Operacija.Prijatelji,id);
@@ -254,11 +295,17 @@ namespace Klijent
             {
                 return Greska(x);
             }
+            finally
+            { 
+                requestLock.Release();
+            }
 
         }
 
         internal async Task<Odgovor> Posalji(string pt,int posiljalac,int primalac, CancellationToken token = default)
         {
+            await requestLock.WaitAsync(token);
+
             try
             {
                 Zahtev z = new Zahtev();
@@ -273,10 +320,16 @@ namespace Klijent
             {
                 return Greska(x);
             }
+            finally
+            { 
+                requestLock.Release();
+            }
         }
 
         internal async Task<Odgovor> DodajPrijatelja(int id, int id2, CancellationToken token = default)
         {
+            await requestLock.WaitAsync(token);
+
             try
             {
                 Zahtev z = new Zahtev();
@@ -294,10 +347,16 @@ namespace Klijent
             {
                 return Greska(x);
             }
+            finally
+            { 
+                requestLock.Release();
+            }
         }
 
         internal async Task<Odgovor> VratiZahtevePrijatelja(int id, CancellationToken token = default)
         {
+            await requestLock.WaitAsync(token);
+
             try
             {
                 Zahtev z = new Zahtev();
@@ -317,10 +376,16 @@ namespace Klijent
             {
                 return Greska(x);
             }
+            finally
+            { 
+                requestLock.Release();
+            }
         }
 
         internal async Task<Odgovor> PrihvatiPrijatelja(Prijateljstvo prijatelj, CancellationToken token = default)
         {
+            await requestLock.WaitAsync(token);
+
             try
             {
                 Zahtev z = new Zahtev();
@@ -335,10 +400,16 @@ namespace Klijent
             {
                 return Greska(x);
             }
+            finally
+            { 
+                requestLock.Release();
+            }
         }
 
         internal async Task<Odgovor> OdbijPrijatelja(Prijateljstvo prijatelj, CancellationToken token = default)
         {
+            await requestLock.WaitAsync(token);
+
             try
             {
                 Zahtev z = new Zahtev();
@@ -353,10 +424,17 @@ namespace Klijent
             {
                 return Greska(x);
             }
+            finally
+            { 
+                requestLock.Release();
+            }
         }
 
         internal async Task<Odgovor> UcitajSvePoruke(Korisnik primalac, Korisnik k, CancellationToken token = default)
         {
+            
+            await requestLock.WaitAsync(token);
+
             try
             {
                 Zahtev z = new Zahtev();
@@ -376,10 +454,16 @@ namespace Klijent
             {
                 return Greska(x);
             }
+            finally
+            { 
+                requestLock.Release();
+            }
         }
 
         internal async Task<Odgovor> ObrisiPrijateljstvo(int id1, int id2, CancellationToken token = default)
         {
+            await requestLock.WaitAsync(token);
+
             try
             {
                 Zahtev z = new Zahtev();
@@ -395,6 +479,10 @@ namespace Klijent
             catch (Exception x)
             {
                 return Greska(x);
+            }
+            finally
+            { 
+                requestLock.Release();
             }
         }
     }

@@ -14,7 +14,7 @@ namespace BrokerBazePodataka
     public class GenericBroker
     {
         private static readonly string password = Environment.GetEnvironmentVariable("MSSQL_SA_PASSWORD")
-            ?? throw new InvalidOperationException("MSSQL_SA_PASSWORD nije podešen.");
+            ?? throw new InvalidOperationException("MSSQL_SA_PASSWORD nije podesen.");
         private static readonly string connectionString = $"Server=localhost,1433;Database=chatapp_db;User Id=sa;Password={password};TrustServerCertificate=True;";
         private SqlConnection con;
         private SqlTransaction? tran;
