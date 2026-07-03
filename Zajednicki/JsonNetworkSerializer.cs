@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO.Pipes;
 using System.Net.Sockets;
 using System.Text;
 using System.Text.Json;
@@ -9,15 +10,14 @@ namespace Zajednicki
 {
     public class JsonNetworkSerializer
     {
-        private Socket socket;
-        private NetworkStream stream;
+       
+        private Stream stream;
         private StreamReader reader;
         private StreamWriter writer;
 
-        public JsonNetworkSerializer(Socket s)
+        public JsonNetworkSerializer(Stream s)
         {
-           socket = s;
-            stream = new NetworkStream(socket);
+            stream = s;
             reader = new StreamReader(stream);
             writer = new StreamWriter(stream)
             {

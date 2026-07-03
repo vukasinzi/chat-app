@@ -4,7 +4,9 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Net;
+using System.Net.Security;
 using System.Net.Sockets;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using Zajednicki;
 
@@ -12,6 +14,11 @@ namespace Server
 {
     public class Server
     {
+        string certPassword = Environment.GetEnvironmentVariable("CHATAPP_CERT_PASSWORD")
+                              ?? throw new InvalidOperationException("CHATAPP_CERT_PASSWORD nije podesen.");
+
+        private readonly X509Certificate2 certificate;
+        
         private Socket serverskiSocket;
         private Socket pushSocket;
         private CancellationTokenSource? cts;
@@ -23,6 +30,7 @@ namespace Server
         
         public Server(string ip, int port, int pushPort)
         {
+            certificate = new X509Certificate2("server.pfx", certPassword);
             this.ip = ip;
             this.port = port;
             this.pushPort = pushPort;
@@ -58,7 +66,14 @@ namespace Server
                 {
 
                     Socket klijentskiSocket = await serverskiSocket.AcceptAsync(token);
-                    ClientHandler handler = new ClientHandler(klijentskiSocket, this);
+
+                    var networkStream = new NetworkStream(klijentskiSocket, ownsSocket: false);
+                    var sslStream = new SslStream(networkStream, leaveInnerStreamOpen: false);
+
+                    await sslStream.AuthenticateAsServerAsync(certificate);
+
+                    ClientHandler handler = new ClientHandler(klijentskiSocket, this, sslStream);
+
                     _ = Task.Run(() => handler.HandleRequests(token), token);
 
                 }
@@ -74,12 +89,17 @@ namespace Server
             while (!token.IsCancellationRequested)
             {
                 Socket s = await pushSocket.AcceptAsync(token);
-                var ser = new JsonNetworkSerializer(s);
+                
+                var networkStream = new NetworkStream(s, ownsSocket: false);
+                var sslStream = new SslStream(networkStream, leaveInnerStreamOpen: false);
+                await sslStream.AuthenticateAsServerAsync(certificate);
+                var ser = new JsonNetworkSerializer(sslStream);
+                
                 try
                 {
                     string username = await ser.ReceiveAsync<string>(token);
                     if (online.TryGetValue(username, out var handler))
-                        await handler.babyConstructor(s); 
+                        await handler.babyConstructor(s,ser); 
                     else
                         s.Close(); 
                 }

@@ -20,20 +20,20 @@ namespace Server
         
         private SemaphoreSlim pushLock = new SemaphoreSlim(1,1);
 
-        public ClientHandler(Socket socket,Server server)
+        public ClientHandler(Socket socket, Server server, Stream stream)
         {
-           
             this.socket = socket;
             this.server = server;
-            serializer = new JsonNetworkSerializer(this.socket);
+            serializer = new JsonNetworkSerializer(stream);
         }
-        internal async Task babyConstructor(Socket s)
+
+        internal async Task babyConstructor(Socket s,JsonNetworkSerializer ser)
         {
             await pushLock.WaitAsync();
             try
             {
             pushSocket = s;
-            pushSerializer = new JsonNetworkSerializer(pushSocket);
+            pushSerializer = ser;
 
             }
             finally

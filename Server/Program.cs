@@ -45,6 +45,7 @@ namespace Server
                     serverTask = server.StartAsync();
                     Console.WriteLine("Server je upaljen.");
                     trenutly = true;
+                    
                 }
             }
           

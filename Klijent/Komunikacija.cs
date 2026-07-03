@@ -3,6 +3,7 @@ using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Net.Security;
 using System.Net.Sockets;
 using System.Text;
 using System.Text.Json;
@@ -83,7 +84,17 @@ namespace Klijent
                 {
                     socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
                     await socket.ConnectAsync(ip, port, token);
-                    serializer = new JsonNetworkSerializer(socket);
+                    var networkStream = new NetworkStream(socket, ownsSocket: false);
+                    var sslStream = new SslStream(
+                        networkStream,
+                        leaveInnerStreamOpen: false,
+                        userCertificateValidationCallback: (sender, certificate, chain, errors) => true
+                    );
+
+                    await sslStream.AuthenticateAsClientAsync("localhost");
+
+                    serializer = new JsonNetworkSerializer(sslStream);
+
                 }
             }
             catch (Exception x)
@@ -132,8 +143,18 @@ namespace Klijent
 
             pushSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
             await pushSocket.ConnectAsync(ip, pushPort, token);
-            pushSerializer = new JsonNetworkSerializer(pushSocket);
+            var networkStream = new NetworkStream(pushSocket, ownsSocket: false);
+            var sslStream = new SslStream(
+                networkStream,
+                leaveInnerStreamOpen: false,
+                userCertificateValidationCallback: (sender, certificate, chain, errors) => true
+            );
+
+            await sslStream.AuthenticateAsClientAsync("localhost");
+
+            pushSerializer = new JsonNetworkSerializer(sslStream);
             await pushSerializer.SendAsync(v, token);
+
 
             pushCts = new CancellationTokenSource();
             _ = Task.Run(() => HandlePush(pushCts.Token), pushCts.Token);
