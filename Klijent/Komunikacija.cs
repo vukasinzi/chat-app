@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Net.Security;
 using System.Net.Sockets;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Text.Json;
 using Zajednicki;
@@ -38,6 +39,7 @@ namespace Klijent
         
         //semafor
         private SemaphoreSlim requestLock = new SemaphoreSlim(1, 1);
+        private const string ExpectedServerThumbprint = "48:E1:11:F8:31:9C:E2:E6:C6:06:4B:36:97:5C:6A:9F:F2:63:94:54";
 
         private Komunikacija()
         {
@@ -52,6 +54,30 @@ namespace Klijent
             port = config.GetRequiredSection("ServerSettings").GetValue<int>("Port");
             pushPort = config.GetRequiredSection("ServerSettings").GetValue<int>("PushPort");
         }
+
+        //provera sertifikata
+        private static bool ValidateServerCertificate( object sender, X509Certificate? certificate, X509Chain? chain, SslPolicyErrors errors)
+        {
+            if (certificate == null)
+                return false;
+
+            var cert2 = new X509Certificate2(certificate);
+
+            string expectedThumbprint = ExpectedServerThumbprint
+                .Replace(":", "")
+                .Replace(" ", "")
+                .ToUpperInvariant();
+
+            string actualThumbprint = cert2.Thumbprint
+                .Replace(":", "")
+                .Replace(" ", "")
+                .ToUpperInvariant();
+
+            return actualThumbprint == expectedThumbprint;
+
+        }
+
+        
 
         bool isConnected()
         {
@@ -88,7 +114,7 @@ namespace Klijent
                     var sslStream = new SslStream(
                         networkStream,
                         leaveInnerStreamOpen: false,
-                        userCertificateValidationCallback: (sender, certificate, chain, errors) => true
+                        userCertificateValidationCallback: (sender, certificate, chain, errors) => ValidateServerCertificate(sender, certificate, chain, errors)
                     );
 
                     await sslStream.AuthenticateAsClientAsync("localhost");
@@ -147,7 +173,7 @@ namespace Klijent
             var sslStream = new SslStream(
                 networkStream,
                 leaveInnerStreamOpen: false,
-                userCertificateValidationCallback: (sender, certificate, chain, errors) => true
+                userCertificateValidationCallback: (sender, certificate, chain, errors) => ValidateServerCertificate(sender, certificate, chain, errors)
             );
 
             await sslStream.AuthenticateAsClientAsync("localhost");
